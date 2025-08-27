@@ -1,0 +1,18 @@
+/*
+ * Centralized color and font variables.
+ * This makes it easy to change the theme of the entire application.
+ */
+:root {
+    --color-primary: #528BFF;       /* Example primary color */
+    --color-secondary: #FFD700;     /* Example accent color */
+    --color-background: #F3F4F6;    /* Light gray background */
+    --color-background-light: #F9FAFB; /* Lighter background for elements */
+    --color-background-hover: #E5E7EB; /* Hover state for elements */
+    --color-white: #FFFFFF;
+
+    --color-border: #E5E7EB;
+
+    --color-text-dark: #1F2937;     /* Dark text for headings */
+    --color-text-regular: #4B5563;  /* Regular text */
+    --color-text-light: #9CA3AF;    /* Light text for labels, etc. */
+}
