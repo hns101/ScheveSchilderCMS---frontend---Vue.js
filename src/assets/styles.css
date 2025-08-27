@@ -5,14 +5,19 @@
 :root {
     --color-primary: #528BFF;       /* Example primary color */
     --color-secondary: #FFD700;     /* Example accent color */
-    --color-background: #F3F4F6;    /* Light gray background */
-    --color-background-light: #F9FAFB; /* Lighter background for elements */
-    --color-background-hover: #E5E7EB; /* Hover state for elements */
-    --color-white: #FFFFFF;
+    --color-background: #4f4a4a;    /* Light gray background */
+    --color-background-light: #f7f7f9; /* Lighter background for elements */
+    --color-background-hover: #ae9d99; /* Hover state for elements */
+    --color-white: #8b6e63;
 
-    --color-border: #E5E7EB;
+    --color-border: #ffffff;
 
-    --color-text-dark: #1F2937;     /* Dark text for headings */
-    --color-text-regular: #4B5563;  /* Regular text */
-    --color-text-light: #9CA3AF;    /* Light text for labels, etc. */
+    --color-text-dark: #ffffff;     /* Dark text for headings */
+    --color-text-regular: #ffffff;  /* Regular text */
+    --color-text-light: #525252;    /* Light text for labels, etc. */
+}
+*{  /*reset css*/
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }

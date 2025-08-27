@@ -1,4 +1,5 @@
-import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router';
+import { createRouter, createWebHistory } from 'vue-router';
+import type { RouteRecordRaw } from 'vue-router'; // Corrected import
 import StudentList from '../components/StudentList.vue';
 import StudentDetail from '../components/StudentDetail.vue';
 import InvoiceBatch from '../components/InvoiceBatch.vue';
