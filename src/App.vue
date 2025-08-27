@@ -3,7 +3,7 @@
     <!-- Sidebar -->
     <aside class="sidebar">
       <div class="sidebar-header">
-        <span class="logo-text">scheveSchilderCMS</span>
+        <img src="./assets/logo.svg" alt="logo" width="184px">
       </div>
       <nav class="sidebar-nav">
         <router-link to="/students" class="nav-item">
@@ -55,8 +55,8 @@ import { RouterLink, RouterView } from 'vue-router';
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 64px;
-  border-bottom: 1px solid var(--color-border);
+  height: 134px;
+  border-bottom: 3px solid var(--color-border);
 }
 
 .logo-text {
