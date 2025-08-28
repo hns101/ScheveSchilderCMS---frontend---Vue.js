@@ -3,7 +3,7 @@
  * This makes it easy to change the theme of the entire application.
  */
 :root {
-    --color-primary: #528BFF;       /* Example primary color */
+    --color-primary: #f8b550;       /* Example primary color */
     --color-secondary: #FFD700;     /* Example accent color */
     --color-background: #4f4a4a;    /* Light gray background */
     --color-background-light: #f7f7f9; /* Lighter background for elements */
@@ -12,7 +12,8 @@
 
     --color-border: #ad9c98;
 
-    --color-text-dark: #ffffff;     /* Dark text for headings */
+    --color-text-dark: #ffffff; /* Dark text for headings */
+    --color-text-dark-d: #1e1e1e; /* Dark text for headings */
     --color-text-regular: #ffffff;  /* Regular text */
     --color-text-light: #525252;    /* Light text for labels, etc. */
 }

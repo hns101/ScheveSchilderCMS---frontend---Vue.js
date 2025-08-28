@@ -143,7 +143,7 @@ onMounted(fetchStudentDetail);
 }
 
 .student-details-card {
-  background-color: var(--color-white);
+  background-color: var(--color-background-light);
   border: 1px solid var(--color-border);
   border-radius: 0.75rem;
   padding: 2rem;
@@ -154,7 +154,7 @@ onMounted(fetchStudentDetail);
 .student-details-title {
   font-size: 1.5rem; /* 24px */
   font-weight: 600;
-  color: var(--color-text-dark);
+  color: var(--color-background);
   margin-bottom: 1.5rem;
 }
 
@@ -165,12 +165,12 @@ onMounted(fetchStudentDetail);
 
 .detail-label {
   font-weight: 500;
-  color: var(--color-text-dark);
+  color: var(--color-text-dark-d);
   width: 150px;
 }
 
 .detail-value {
-  color: var(--color-text-regular);
+  color: var(--color-text-dark-d);
   flex: 1;
 }
 
