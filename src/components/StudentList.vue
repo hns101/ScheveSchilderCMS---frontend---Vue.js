@@ -30,7 +30,8 @@ const router = useRouter();
 
 const fetchStudents = async () => {
   try {
-    const response = await axios.get<Student[]>('https://localhost:7123/api/students'); // Adjust URL if your backend is on a different port
+    // IMPORTANT: Use the relative path /api/students because Nginx is proxying
+    const response = await axios.get<Student[]>('/api/students');
     students.value = response.data;
   } catch (err) {
     console.error("Fout bij het ophalen van studenten:", err);

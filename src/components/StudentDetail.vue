@@ -72,7 +72,8 @@ const router = useRouter();
 const fetchStudentDetail = async () => {
   try {
     const studentId = route.params.id as string;
-    const response = await axios.get<Student>(`https://localhost:7123/api/students/${studentId}`); // Adjust URL
+    // IMPORTANT: Use the relative path /api/students/{id} because Nginx is proxying
+    const response = await axios.get<Student>(`/api/students/${studentId}`);
     student.value = response.data;
   } catch (err) {
     console.error("Fout bij het ophalen van studentdetails:", err);
@@ -83,7 +84,8 @@ const fetchStudentDetail = async () => {
 };
 
 const getInvoiceFileUrl = (invoiceId: string) => {
-  return `https://localhost:7123/api/invoices/file/${invoiceId}`; // Adjust URL
+  // IMPORTANT: Use the relative path /api/invoices/file/{id} because Nginx is proxying
+  return `/api/invoices/file/${invoiceId}`;
 };
 
 onMounted(fetchStudentDetail);
