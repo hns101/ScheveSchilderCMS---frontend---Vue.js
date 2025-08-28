@@ -72,19 +72,29 @@ const router = useRouter();
 const fetchStudentDetail = async () => {
   try {
     const studentId = route.params.id as string;
-    // IMPORTANT: Use the relative path /api/students/{id} because Nginx is proxying
+
+    if (!studentId || studentId.length !== 24) { // Basic check for ObjectId length
+      error.value = "Ongeldig student ID formaat.";
+      loading.value = false;
+      return;
+    }
+
     const response = await axios.get<Student>(`/api/students/${studentId}`);
     student.value = response.data;
-  } catch (err) {
+  } catch (err: any) { // Catch any type of error
     console.error("Fout bij het ophalen van studentdetails:", err);
-    error.value = "Er is een fout opgetreden bij het laden van studentdetails.";
+    // Attempt to get a more specific error message from the backend response
+    if (err.response && err.response.data && err.response.data.title) {
+      error.value = `Fout: ${err.response.data.title} - ${err.response.data.detail || ''}`;
+    } else {
+      error.value = "Er is een fout opgetreden bij het laden van studentdetails.";
+    }
   } finally {
     loading.value = false;
   }
 };
 
 const getInvoiceFileUrl = (invoiceId: string) => {
-  // IMPORTANT: Use the relative path /api/invoices/file/{id} because Nginx is proxying
   return `/api/invoices/file/${invoiceId}`;
 };
 
