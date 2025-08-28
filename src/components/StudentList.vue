@@ -102,7 +102,7 @@ onMounted(fetchStudents);
 }
 
 .student-card {
-  background-color: var(--color-white);
+  background-color: var(--color-background);
   border: 1px solid var(--color-border);
   border-radius: 0.75rem;
   padding: 1.5rem;
