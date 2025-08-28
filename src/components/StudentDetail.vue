@@ -165,12 +165,12 @@ onMounted(fetchStudentDetail);
 
 .detail-label {
   font-weight: 500;
-  color: var(--color-text-dark-d);
+  color: var(--color-background);
   width: 150px;
 }
 
 .detail-value {
-  color: var(--color-text-dark-d);
+  color: var(--color-background);
   flex: 1;
 }
 
@@ -182,7 +182,7 @@ onMounted(fetchStudentDetail);
 .invoices-title {
   font-size: 1.5rem;
   font-weight: 600;
-  color: var(--color-text-dark);
+  color: var(--color-background);
   margin-top: 2rem;
   margin-bottom: 1rem;
 }
@@ -196,7 +196,7 @@ onMounted(fetchStudentDetail);
 .invoice-item {
   padding: 1rem 1.5rem;
   border-bottom: 1px solid var(--color-border);
-  background-color: var(--color-background-light);
+  background-color: var(--color-background);
 }
 
 .invoice-item:last-child {
