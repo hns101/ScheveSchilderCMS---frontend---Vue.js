@@ -161,6 +161,7 @@ onMounted(fetchStudentDetail);
 .detail-group {
   display: flex;
   margin-bottom: 0.75rem;
+  gap: 2.4rem;
 }
 
 .detail-label {
@@ -196,7 +197,7 @@ onMounted(fetchStudentDetail);
 .invoice-item {
   padding: 1rem 1.5rem;
   border-bottom: 1px solid var(--color-border);
-  background-color: var(--color-background);
+  background-color: var(--color-white);
 }
 
 .invoice-item:last-child {
