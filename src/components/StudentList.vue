@@ -103,7 +103,7 @@ onMounted(fetchStudents);
 
 .student-card {
   background-color: var(--color-background);
-  border: 1px solid var(--color-border);
+  border: 4px solid var(--color-background-light);
   border-radius: 0.75rem;
   padding: 1.5rem;
   box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
