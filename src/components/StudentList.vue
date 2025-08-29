@@ -102,8 +102,7 @@ onMounted(fetchStudents);
 }
 
 .student-card {
-  background-color: var(--color-background);
-  border: 4px solid var(--color-background-light);
+  background-color: var(--color-background-light);
   border-radius: 0.75rem;
   padding: 1.5rem;
   box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
@@ -119,13 +118,13 @@ onMounted(fetchStudents);
 .student-card-title {
   font-size: 1.25rem; /* 20px */
   font-weight: 600;
-  color: var(--color-text-dark);
+  color: var(--color-background);
   margin-bottom: 0.5rem;
 }
 
 .student-card-detail {
   font-size: 0.875rem; /* 14px */
-  color: var(--color-text-regular);
+  color: var(--color-background);
   margin-bottom: 0.25rem;
 }
 </style>

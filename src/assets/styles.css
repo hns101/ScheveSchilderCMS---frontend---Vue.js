@@ -16,6 +16,7 @@
     --color-text-dark-d: #1e1e1e; /* Dark text for headings */
     --color-text-regular: #ffffff;  /* Regular text */
     --color-text-light: #525252;    /* Light text for labels, etc. */
+    --color-light-gray: #d5d5d5;    /* Light text for labels, etc. */
 }
 *{  /*reset css*/
     margin: 0;

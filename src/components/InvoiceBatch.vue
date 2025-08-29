@@ -70,7 +70,7 @@
             <td>{{ invoice.description }}</td>
             <td>
               <a :href="getInvoiceFileUrl(invoice.id!)" target="_blank" class="table-action-link">Bekijk PDF</a>
-              <button @click="deleteInvoice(invoice.id!)" class="table-action-button">Verwijder</button>
+              <button @click="deleteInvoice(invoice.id!)" class="table-action-button-ib">Verwijder</button>
             </td>
           </tr>
           </tbody>
@@ -216,7 +216,7 @@ onMounted(() => {
 }
 
 .form-card, .invoice-list-card {
-  background-color: var(--color-white);
+  background-color: var(--color-background-light);
   border: 1px solid var(--color-border);
   border-radius: 0.75rem;
   padding: 2rem;
@@ -227,7 +227,7 @@ onMounted(() => {
 .form-title {
   font-size: 1.5rem; /* 24px */
   font-weight: 600;
-  color: var(--color-text-dark);
+  color: var(--color-background);
   margin-bottom: 1.5rem;
 }
 
@@ -238,7 +238,7 @@ onMounted(() => {
 .form-label {
   display: block;
   font-weight: 500;
-  color: var(--color-text-dark);
+  color: var(--color-background);
   margin-bottom: 0.5rem;
 }
 
@@ -248,14 +248,14 @@ onMounted(() => {
   border: 1px solid var(--color-border);
   border-radius: 0.5rem;
   font-size: 1rem;
-  color: var(--color-text-regular);
+  color: var(--color-background);
   background-color: var(--color-background-light);
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.form-input:focus, .form-select:focus {
+.form-input:focus {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 2px rgba(var(--color-primary-rgb), 0.2); /* Adjust if you define RGB for primary */
+  box-shadow: 0 0 0 2px rgba(var(--color-background), 0.2); /* Adjust if you define RGB for primary */
   outline: none;
 }
 
@@ -265,7 +265,7 @@ onMounted(() => {
 
 .submit-button {
   background-color: var(--color-primary);
-  color: var(--color-white);
+  color: var(--color-background-light);
   padding: 0.75rem 1.5rem;
   border-radius: 0.5rem;
   border: none;
@@ -276,7 +276,7 @@ onMounted(() => {
 }
 
 .submit-button:hover:not(:disabled) {
-  background-color: darken(var(--color-primary), 10%); /* Requires a CSS preprocessor or manual calculation */
+  background-color: var(--color-primary); /* Requires a CSS preprocessor or manual calculation */
 }
 
 .submit-button:disabled {
@@ -346,31 +346,31 @@ onMounted(() => {
 }
 
 .invoice-table td {
-  background-color: var(--color-white);
-  color: var(--color-text-regular);
+  background-color: var( --color-light-gray);
+  color: var(--color-background);
 }
 
-.invoice-table tbody tr:hover {
+.invoice-table tbody :hover {
   background-color: var(--color-background-light);
 }
 
 .table-action-link {
-  color: var(--color-primary);
+  color: var(--color-white);
   text-decoration: underline;
   margin-right: 0.5rem;
 }
 
-.table-action-button {
-  background-color: #ef4444; /* red */
-  color: var(--color-white);
+.table-action-button-ib {
+  background-color: #8f4747; /* red */
+  color: var(--color-background-light);
   padding: 0.5rem 1rem;
   border-radius: 0.5rem;
   border: none;
   cursor: pointer;
-  transition: background-color 0.2s ease;
 }
 
-.table-action-button:hover {
-  background-color: #dc2626; /* darker red */
+.table-action-button-ib:hover {
+  background-color: #8f4747;
 }
+
 </style>

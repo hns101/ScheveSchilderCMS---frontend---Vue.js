@@ -107,7 +107,7 @@ onMounted(fetchStudentDetail);
   margin-left: auto;
   margin-right: auto;
   padding: 2rem;
-  background-color: var(--color-background);
+  background-color: var(--color-white);
   border-radius: 0.75rem;
   box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
 }
@@ -176,7 +176,7 @@ onMounted(fetchStudentDetail);
 }
 
 .detail-link {
-  color: var(--color-primary);
+  color: var(--color-white);
   text-decoration: underline;
 }
 
@@ -196,8 +196,7 @@ onMounted(fetchStudentDetail);
 
 .invoice-item {
   padding: 1rem 1.5rem;
-  border-bottom: 1px solid var(--color-border);
-  background-color: var(--color-white);
+  background-color: var(--color-light-gray);
 }
 
 .invoice-item:last-child {
@@ -206,12 +205,12 @@ onMounted(fetchStudentDetail);
 
 .invoice-item p {
   margin-bottom: 0.25rem;
-  color: var(--color-text-regular);
+  color: var(--color-background);
 }
 
 .back-button {
   background-color: var(--color-primary);
-  color: var(--color-white);
+  color: var( --color-background-light);
   padding: 0.75rem 1.5rem;
   border-radius: 0.5rem;
   border: none;
@@ -220,7 +219,4 @@ onMounted(fetchStudentDetail);
   transition: background-color 0.2s ease;
 }
 
-.back-button:hover {
-  background-color: darken(var(--color-primary), 10%);
-}
 </style>
