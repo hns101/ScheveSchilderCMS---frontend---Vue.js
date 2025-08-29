@@ -1,14 +1,16 @@
 <template>
   <div class="page-container">
-    <h1 class="page-title">Ledenboek</h1>
-    <p class="page-description">Overzicht van alle geregistreerde studenten.</p>
-
-    <button @click="navigateToAddStudent" class="add-student-button">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-      </svg>
-      Nieuwe Student Toevoegen
-    </button>
+    <div class="student-list-header">
+      <div>
+        <h1 class="page-title">Ledenboek</h1>
+        <p class="page-description">Overzicht van alle geregistreerde studenten.</p>
+      </div>
+      <button @click="navigateToAddStudent" class="add-student-button">
+        <svg xmlns="http://www.w3.org/2000/svg" class="add-student-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+        </svg>
+      </button>
+    </div>
 
     <div v-if="loading" class="loading-message">Laden van studenten...</div>
     <div v-if="error" class="error-message">{{ error }}</div>
@@ -28,7 +30,7 @@
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
-import type { Student } from '../types/Student';
+import type { Student } from '../types/Student'; // Import the Student interface
 
 const students = ref<Student[]>([]);
 const loading = ref(true);
@@ -69,35 +71,51 @@ onMounted(fetchStudents);
   box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
 }
 
+.student-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start; /* Align items to the top */
+  margin-bottom: 1.5rem; /* Add some space below the header */
+}
+
 .page-title {
   font-size: 1.875rem; /* 30px */
   font-weight: 600;
   color: var(--color-text-dark);
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem; /* Reduced margin to align better with button */
 }
 
 .page-description {
   margin-top: 0.5rem;
   color: var(--color-text-regular);
-  margin-bottom: 1.5rem;
+  margin-bottom: 0; /* Remove bottom margin as it's handled by header */
 }
 
 .add-student-button {
   background-color: var(--color-primary);
-  color: var(--color-white);
-  padding: 0.75rem 1.5rem;
+  color: var(--color-background-light); /* Reverted to original color */
+  padding: 0.5rem; /* Made smaller for just an icon */
+  width: 2.5rem; /* Fixed width for a square button */
+  height: 2.5rem; /* Fixed height for a square button */
   border-radius: 0.5rem;
   border: none;
   cursor: pointer;
-  margin-bottom: 1.5rem;
   display: flex;
   align-items: center;
+  justify-content: center; /* Center the icon */
   font-weight: 600;
   transition: background-color 0.2s ease;
 }
 
 .add-student-button:hover {
-  background-color: #4078e0; /* Darker shade of primary */
+  background-color: #b0753a; /* Darker shade of primary */
+}
+
+.add-student-icon {
+  width: 1.5rem; /* Icon size */
+  height: 1.5rem; /* Icon size */
+  stroke: var(--color-background-light); /* Color of the SVG icon */
+  margin-right: 0; /* Remove margin-right as there's no text */
 }
 
 .loading-message, .error-message, .no-data-message {
@@ -146,13 +164,13 @@ onMounted(fetchStudents);
 .student-card-title {
   font-size: 1.25rem; /* 20px */
   font-weight: 600;
-  color: var(--color-background);
+  color: var(--color-background); /* Reverted to original color */
   margin-bottom: 0.5rem;
 }
 
 .student-card-detail {
   font-size: 0.875rem; /* 14px */
-  color: var(--color-background);
+  color: var(--color-background); /* Reverted to original color */
   margin-bottom: 0.25rem;
 }
 </style>

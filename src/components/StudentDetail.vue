@@ -205,7 +205,7 @@ onMounted(fetchStudentDetail);
 
 .edit-student-button, .delete-student-button {
   background-color: var(--color-primary);
-  color: var(--color-white);
+  color: var(--color-background-light);
   padding: 0.5rem 1rem;
   border-radius: 0.5rem;
   border: none;
@@ -217,11 +217,12 @@ onMounted(fetchStudentDetail);
 }
 
 .edit-student-button:hover {
-  background-color: #4078e0; /* Darker shade of primary */
+  background-color: #d09e5f; /* Darker shade of primary */
 }
 
 .delete-student-button {
-  background-color: #ef4444; /* Red color for delete */
+  background-color: #ef4444;
+  color: var(--color-background-light);
 }
 
 .delete-student-button:hover {
@@ -291,6 +292,6 @@ onMounted(fetchStudentDetail);
 }
 
 .back-button:hover {
-  background-color: #4078e0; /* Darker shade of primary */
+  background-color: #d09e5f;  /* Darker shade of primary */
 }
 </style>

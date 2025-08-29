@@ -23,14 +23,19 @@
         </div>
 
         <div class="form-group">
-          <label for="students" class="form-label">Selecteer Studenten:</label>
-          <select id="students" v-model="batchRequest.studentIds" multiple class="form-select" required>
-            <option v-for="student in availableStudents" :key="student.id" :value="student.id">
+          <label class="form-label">Selecteer Studenten:</label>
+          <div class="student-selection-actions">
+            <button type="button" @click="selectAllStudents" class="select-all-button">Selecteer Alles</button>
+            <button type="button" @click="deselectAllStudents" class="deselect-all-button">Deselecteer Alles</button>
+          </div>
+          <div v-if="loadingStudents" class="loading-message-small">Laden van studenten...</div>
+          <div v-else-if="!availableStudents.length" class="no-data-message-small">Geen studenten beschikbaar.</div>
+          <div v-else class="student-checkbox-list">
+            <label v-for="student in availableStudents" :key="student.id" class="checkbox-item">
+              <input type="checkbox" :value="student.id" v-model="batchRequest.studentIds" class="checkbox-input" />
               {{ student.name }} ({{ student.studentNumber }})
-            </option>
-          </select>
-          <p v-if="!availableStudents.length && !loadingStudents" class="text-sm text-gray-500 mt-1">Geen studenten beschikbaar om te selecteren.</p>
-          <p v-if="loadingStudents" class="text-sm text-gray-500 mt-1">Laden van studenten...</p>
+            </label>
+          </div>
         </div>
 
         <button type="submit" class="submit-button" :disabled="generating || !batchRequest.studentIds.length">
@@ -184,6 +189,16 @@ const deleteInvoice = async (invoiceId: string) => {
   }
 };
 
+// Selects all available students
+const selectAllStudents = () => {
+  batchRequest.value.studentIds = availableStudents.value.map(s => s.id!);
+};
+
+// Deselects all students
+const deselectAllStudents = () => {
+  batchRequest.value.studentIds = [];
+};
+
 // --- Lifecycle Hook ---
 onMounted(() => {
   fetchAvailableStudents();
@@ -253,15 +268,69 @@ onMounted(() => {
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.form-input:focus {
+.form-input:focus, .form-select:focus {
   border-color: var(--color-primary);
   box-shadow: 0 0 0 2px rgba(var(--color-background), 0.2); /* Adjust if you define RGB for primary */
   outline: none;
 }
 
-.form-select {
-  min-height: 100px; /* For multiple select */
+/* New styles for checkbox list and buttons */
+.student-selection-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
 }
+
+.select-all-button, .deselect-all-button {
+  background-color: var(--color-primary);
+  color: var(--color-background-light);
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.2s ease;
+}
+
+.select-all-button:hover, .deselect-all-button:hover {
+  background-color: #4078e0; /* Darker shade of primary */
+}
+
+.student-checkbox-list {
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  max-height: 200px;
+  overflow-y: auto;
+  background-color: var(--color-background-light);
+  padding: 0.5rem;
+}
+
+.checkbox-item {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem;
+  color: var(--color-background);
+  cursor: pointer;
+}
+
+.checkbox-item:hover {
+  background-color: var(--color-background-hover);
+}
+
+.checkbox-input {
+  margin-right: 0.5rem;
+}
+
+.loading-message-small, .no-data-message-small {
+  padding: 0.5rem;
+  border-radius: 0.25rem;
+  margin-top: 0.5rem;
+  text-align: center;
+  font-size: 0.875rem;
+  color: var(--color-text-light);
+  background-color: var(--color-background-hover);
+}
+
 
 .submit-button {
   background-color: var(--color-primary);
@@ -289,6 +358,7 @@ onMounted(() => {
   border-radius: 0.5rem;
   margin-top: 1rem;
   font-weight: 500;
+  text-align: center;
 }
 
 .message.success {

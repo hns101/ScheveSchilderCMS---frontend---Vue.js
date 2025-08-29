@@ -218,7 +218,7 @@ onMounted(() => {
   border: 1px solid var(--color-border);
   border-radius: 0.5rem;
   font-size: 1rem;
-  color: var(--color-text-regular); /* Corrected to text-regular */
+  color: var(--color-background); /* Corrected to text-regular */
   background-color: var(--color-background-light);
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
@@ -237,7 +237,7 @@ onMounted(() => {
 
 .submit-button, .cancel-button {
   background-color: var(--color-primary);
-  color: var(--color-white);
+  color: var(--color-background-light);
   padding: 0.75rem 1.5rem;
   border-radius: 0.5rem;
   border: none;
@@ -247,7 +247,7 @@ onMounted(() => {
 }
 
 .submit-button:hover:not(:disabled) {
-  background-color: #4078e0; /* Darker shade of primary */
+  background-color: #b67949; /* Darker shade of primary */
 }
 
 .submit-button:disabled {
@@ -257,6 +257,7 @@ onMounted(() => {
 
 .cancel-button {
   background-color: var(--color-text-light);
+  color: var(--color-background-light);
 }
 
 .cancel-button:hover {
