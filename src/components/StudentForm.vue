@@ -2,122 +2,128 @@
   <div class="form-card">
     <h2 class="form-title">{{ isEditing ? 'Student Bewerken' : 'Nieuwe Student Toevoegen' }}</h2>
     <form @submit.prevent="submitForm">
-      <div class="form-group">
-        <label for="name" class="form-label">Naam:</label>
-        <input type="text" id="name" v-model="formData.name" class="form-input" required />
-      </div>
+      <div v-if="loadingStudent" class="loading-message">Laden van studentgegevens...</div>
+      <div v-if="studentFetchError" class="error-message">{{ studentFetchError }}</div>
 
-      <div class="form-group">
-        <label for="studentNumber" class="form-label">Studentnummer:</label>
-        <input type="text" id="studentNumber" v-model="formData.studentNumber" class="form-input" required />
-      </div>
+      <template v-if="!loadingStudent">
+        <div class="form-group">
+          <label for="name" class="form-label">Naam:</label>
+          <input type="text" id="name" v-model="formData.name" class="form-input" required />
+        </div>
 
-      <div class="form-group">
-        <label for="address" class="form-label">Adres:</label>
-        <input type="text" id="address" v-model="formData.address" class="form-input" required />
-      </div>
+        <div class="form-group">
+          <label for="studentNumber" class="form-label">Studentnummer:</label>
+          <input type="text" id="studentNumber" v-model="formData.studentNumber" class="form-input" required />
+        </div>
 
-      <div class="form-group">
-        <label for="email" class="form-label">Email:</label>
-        <input type="email" id="email" v-model="formData.email" class="form-input" required />
-      </div>
+        <div class="form-group">
+          <label for="address" class="form-label">Adres:</label>
+          <input type="text" id="address" v-model="formData.address" class="form-input" required />
+        </div>
 
-      <div class="form-group">
-        <label for="phoneNumber" class="form-label">Telefoonnummer:</label>
-        <input type="tel" id="phoneNumber" v-model="formData.phoneNumber" class="form-input" required />
-      </div>
+        <div class="form-group">
+          <label for="email" class="form-label">Email:</label>
+          <input type="email" id="email" v-model="formData.email" class="form-input" required />
+        </div>
 
-      <div class="form-group">
-        <label for="emergencyContact" class="form-label">Noodcontact:</label>
-        <input type="text" id="emergencyContact" v-model="formData.emergencyContact" class="form-input" required />
-      </div>
+        <div class="form-group">
+          <label for="phoneNumber" class="form-label">Telefoonnummer:</label>
+          <input type="tel" id="phoneNumber" v-model="formData.phoneNumber" class="form-input" required />
+        </div>
 
-      <div class="form-group">
-        <label for="bankName" class="form-label">Banknaam:</label>
-        <input type="text" id="bankName" v-model="formData.bankName" class="form-input" required />
-      </div>
+        <div class="form-group">
+          <label for="emergencyContact" class="form-label">Noodcontact:</label>
+          <input type="text" id="emergencyContact" v-model="formData.emergencyContact" class="form-input" required />
+        </div>
 
-      <div class="form-group">
-        <label for="accountNumber" class="form-label">Bankrekeningnummer:</label>
-        <input type="text" id="accountNumber" v-model="formData.accountNumber" class="form-input" required />
-      </div>
+        <div class="form-group">
+          <label for="bankName" class="form-label">Banknaam:</label>
+          <input type="text" id="bankName" v-model="formData.bankName" class="form-input" required />
+        </div>
 
-      <div class="form-group">
-        <label for="dateOfRegistration" class="form-label">Registratiedatum:</label>
-        <input type="date" id="dateOfRegistration" v-model="formattedDateOfRegistration" class="form-input" required />
-      </div>
+        <div class="form-group">
+          <label for="accountNumber" class="form-label">Bankrekeningnummer:</label>
+          <input type="text" id="accountNumber" v-model="formData.accountNumber" class="form-input" required />
+        </div>
 
-      <!-- Registration Document Upload (Optional - requires backend file upload endpoint) -->
-      <!-- For now, we'll just display the path if editing -->
-      <div class="form-group" v-if="isEditing && formData.registrationDocumentPath">
-        <p class="form-label">Registratiedocument:</p>
-        <a :href="formData.registrationDocumentPath" target="_blank" class="detail-link">Bekijk document</a>
-      </div>
-      <!-- TODO: Implement actual file upload if needed -->
+        <div class="form-group">
+          <label for="dateOfRegistration" class="form-label">Registratiedatum:</label>
+          <input type="date" id="dateOfRegistration" v-model="formattedDateOfRegistration" class="form-input" required />
+        </div>
 
-      <div class="form-actions">
-        <button type="submit" class="submit-button" :disabled="submitting">
-          <span v-if="submitting">{{ isEditing ? 'Opslaan...' : 'Toevoegen...' }}</span>
-          <span v-else>{{ isEditing ? 'Opslaan' : 'Toevoegen' }}</span>
-        </button>
-        <button type="button" @click="$emit('cancel')" class="cancel-button">Annuleren</button>
-      </div>
-      <div v-if="submitMessage" :class="['message', submitStatus]">{{ submitMessage }}</div>
+        <div class="form-group" v-if="isEditing && formData.registrationDocumentPath">
+          <p class="form-label">Registratiedocument:</p>
+          <a :href="formData.registrationDocumentPath" target="_blank" class="detail-link">Bekijk document</a>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="submit-button" :disabled="submitting">
+            <span v-if="submitting">{{ isEditing ? 'Opslaan...' : 'Toevoegen...' }}</span>
+            <span v-else>{{ isEditing ? 'Opslaan' : 'Toevoegen' }}</span>
+          </button>
+          <button type="button" @click="cancelForm" class="cancel-button">Annuleren</button>
+        </div>
+        <div v-if="submitMessage" :class="['message', submitStatus]">{{ submitMessage }}</div>
+      </template>
     </form>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue';
+import { ref, watch, computed, onMounted } from 'vue';
 import axios from 'axios';
+import { useRouter, useRoute } from 'vue-router';
 import type { Student } from '../types/Student';
 
 const props = defineProps<{
-  student?: Student; // Optional prop for editing an existing student
+  id?: string; // Prop to receive student ID for editing
 }>();
 
 const emit = defineEmits(['submitted', 'cancel']);
+const router = useRouter();
+const route = useRoute();
 
-const isEditing = computed(() => !!props.student?.id);
+const isEditing = computed(() => !!props.id);
 
 const formData = ref<Student>({
-  id: props.student?.id || undefined,
-  name: props.student?.name || '',
-  studentNumber: props.student?.studentNumber || '',
-  address: props.student?.address || '',
-  email: props.student?.email || '',
-  phoneNumber: props.student?.phoneNumber || '',
-  emergencyContact: props.student?.emergencyContact || '',
-  bankName: props.student?.bankName || '',
-  accountNumber: props.student?.accountNumber || '',
-  dateOfRegistration: props.student?.dateOfRegistration ? new Date(props.student.dateOfRegistration) : new Date(),
-  registrationDocumentPath: props.student?.registrationDocumentPath || undefined,
+  name: '', studentNumber: '', address: '', email: '', phoneNumber: '',
+  emergencyContact: '', bankName: '', accountNumber: '', dateOfRegistration: new Date(),
 });
 
+const loadingStudent = ref(false);
+const studentFetchError = ref<string | null>(null);
 const submitting = ref(false);
 const submitMessage = ref<string | null>(null);
 const submitStatus = ref<'success' | 'error' | null>(null);
 
-// Watch for changes in the student prop to update formData when editing
-watch(() => props.student, (newStudent) => {
-  if (newStudent) {
+const fetchStudentData = async (studentId: string) => {
+  loadingStudent.value = true;
+  studentFetchError.value = null;
+  try {
+    const response = await axios.get<Student>(`/api/students/${studentId}`);
     formData.value = {
-      id: newStudent.id,
-      name: newStudent.name,
-      studentNumber: newStudent.studentNumber,
-      address: newStudent.address,
-      email: newStudent.email,
-      phoneNumber: newStudent.phoneNumber,
-      emergencyContact: newStudent.emergencyContact,
-      bankName: newStudent.bankName,
-      accountNumber: newStudent.accountNumber,
-      dateOfRegistration: new Date(newStudent.dateOfRegistration),
-      registrationDocumentPath: newStudent.registrationDocumentPath,
+      ...response.data,
+      dateOfRegistration: new Date(response.data.dateOfRegistration),
+    };
+  } catch (err: any) {
+    console.error(`Fout bij het ophalen van student met ID ${studentId}:`, err);
+    studentFetchError.value = `Fout bij het laden van studentgegevens: ${err.response?.data?.title || err.message}`;
+  } finally {
+    loadingStudent.value = false;
+  }
+};
+
+watch(() => props.id, (newId) => {
+  if (newId) {
+    fetchStudentData(newId);
+  } else {
+    formData.value = {
+      name: '', studentNumber: '', address: '', email: '', phoneNumber: '',
+      emergencyContact: '', bankName: '', accountNumber: '', dateOfRegistration: new Date(),
     };
   }
 }, { immediate: true });
 
-// Computed property to handle date input binding (YYYY-MM-DD format)
 const formattedDateOfRegistration = computed({
   get: () => {
     if (formData.value.dateOfRegistration) {
@@ -133,14 +139,13 @@ const formattedDateOfRegistration = computed({
   }
 });
 
-
 const submitForm = async () => {
   submitting.value = true;
   submitMessage.value = null;
   submitStatus.value = null;
 
   try {
-    if (isEditing.value) {
+    if (isEditing.value && formData.value.id) {
       await axios.put(`/api/students/${formData.value.id}`, formData.value);
       submitMessage.value = 'Student succesvol bijgewerkt!';
       submitStatus.value = 'success';
@@ -148,24 +153,38 @@ const submitForm = async () => {
       await axios.post('/api/students', formData.value);
       submitMessage.value = 'Student succesvol toegevoegd!';
       submitStatus.value = 'success';
-      // Clear form for new entry if adding
       formData.value = {
         name: '', studentNumber: '', address: '', email: '', phoneNumber: '',
         emergencyContact: '', bankName: '', accountNumber: '', dateOfRegistration: new Date(),
       };
     }
-    emit('submitted'); // Notify parent component
+    emit('submitted');
+    router.back();
   } catch (err: any) {
     console.error("Fout bij het opslaan van student:", err);
-    submitMessage.value = `Fout: ${err.response?.data?.detail || err.response?.data?.title || err.message}`;
+    submitMessage.value = `Fout: ${err.response?.data?.title || err.response?.data?.detail || err.message}`;
     submitStatus.value = 'error';
   } finally {
     submitting.value = false;
   }
 };
+
+const cancelForm = () => {
+  emit('cancel');
+  router.back();
+};
+
+onMounted(() => {
+  if (props.id) {
+    fetchStudentData(props.id);
+  }
+});
 </script>
 
 <style scoped>
+/* Your provided CSS for form-card, form-title, form-group, form-label, form-input, form-select,
+   form-actions, submit-button, cancel-button, message, message.success, message.error, detail-link */
+
 .form-card {
   background-color: var(--color-white);
   border: 1px solid var(--color-border);
@@ -199,13 +218,13 @@ const submitForm = async () => {
   border: 1px solid var(--color-border);
   border-radius: 0.5rem;
   font-size: 1rem;
-  color: var(--color-text-regular);
+  color: var(--color-text-regular); /* Corrected to text-regular */
   background-color: var(--color-background-light);
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .form-input:focus, .form-select:focus {
-  border-color: var(--color-primary);
+  border-color: var(--color-primary); /* Corrected to primary */
   box-shadow: 0 0 0 2px rgba(82, 139, 255, 0.2); /* Using RGB for primary color */
   outline: none;
 }

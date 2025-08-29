@@ -146,13 +146,13 @@ onMounted(fetchStudents);
 .student-card-title {
   font-size: 1.25rem; /* 20px */
   font-weight: 600;
-  color: var(--color-text-dark); /* Changed to text-dark for better contrast */
+  color: var(--color-background);
   margin-bottom: 0.5rem;
 }
 
 .student-card-detail {
   font-size: 0.875rem; /* 14px */
-  color: var(--color-text-regular); /* Changed to text-regular for better contrast */
+  color: var(--color-background);
   margin-bottom: 0.25rem;
 }
 </style>

@@ -9,12 +9,20 @@
     <div v-if="student" class="student-details-card">
       <div class="student-details-header">
         <h2 class="student-details-title">{{ student.name }} ({{ student.studentNumber }})</h2>
-        <button @click="navigateToEditStudent(student.id!)" class="edit-student-button">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L7.5 21H3v-4.5L15.232 5.232z" />
-          </svg>
-          Bewerken
-        </button>
+        <div class="student-actions">
+          <button @click="navigateToEditStudent(student.id!)" class="edit-student-button">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L7.5 21H3v-4.5L15.232 5.232z" />
+            </svg>
+            Bewerken
+          </button>
+          <button @click="deleteStudent(student.id!)" class="delete-student-button">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+            Verwijder
+          </button>
+        </div>
       </div>
 
       <div class="detail-group">
@@ -110,6 +118,19 @@ const navigateToEditStudent = (id: string) => {
   router.push({ name: 'EditStudent', params: { id } });
 };
 
+const deleteStudent = async (id: string) => {
+  if (confirm('Weet u zeker dat u deze student en alle bijbehorende facturen wilt verwijderen?')) {
+    try {
+      await axios.delete(`/api/students/${id}`);
+      alert('Student succesvol verwijderd!');
+      router.push({ name: 'StudentList' }); // Navigate back to the list after deletion
+    } catch (err: any) {
+      console.error("Fout bij het verwijderen van student:", err);
+      alert(`Fout bij het verwijderen van student: ${err.response?.data?.title || err.message}`);
+    }
+  }
+};
+
 onMounted(fetchStudentDetail);
 </script>
 
@@ -173,10 +194,16 @@ onMounted(fetchStudentDetail);
 .student-details-title {
   font-size: 1.5rem; /* 24px */
   font-weight: 600;
-  color: var(--color-text-dark); /* Changed to text-dark for better contrast */
+  color: var(--color-background);
+  margin-bottom: 1.5rem;
 }
 
-.edit-student-button {
+.student-actions {
+  display: flex;
+  gap: 1rem;
+}
+
+.edit-student-button, .delete-student-button {
   background-color: var(--color-primary);
   color: var(--color-white);
   padding: 0.5rem 1rem;
@@ -193,6 +220,14 @@ onMounted(fetchStudentDetail);
   background-color: #4078e0; /* Darker shade of primary */
 }
 
+.delete-student-button {
+  background-color: #ef4444; /* Red color for delete */
+}
+
+.delete-student-button:hover {
+  background-color: #dc2626; /* Darker red for delete */
+}
+
 .detail-group {
   display: flex;
   margin-bottom: 0.75rem;
@@ -201,24 +236,24 @@ onMounted(fetchStudentDetail);
 
 .detail-label {
   font-weight: 500;
-  color: var(--color-text-dark); /* Changed to text-dark for better contrast */
+  color: var(--color-background);
   width: 150px;
 }
 
 .detail-value {
-  color: var(--color-text-regular); /* Changed to text-regular for better contrast */
+  color: var(--color-background);
   flex: 1;
 }
 
 .detail-link {
-  color: var(--color-primary);
+  color: var(--color-white);
   text-decoration: underline;
 }
 
 .invoices-title {
   font-size: 1.5rem;
   font-weight: 600;
-  color: var(--color-text-dark); /* Changed to text-dark for better contrast */
+  color: var(--color-background);
   margin-top: 2rem;
   margin-bottom: 1rem;
 }
@@ -241,12 +276,12 @@ onMounted(fetchStudentDetail);
 
 .invoice-item p {
   margin-bottom: 0.25rem;
-  color: var(--color-text-regular); /* Changed to text-regular for better contrast */
+  color: var(--color-background);
 }
 
 .back-button {
   background-color: var(--color-primary);
-  color: var(--color-white);
+  color: var(--color-background-light);
   padding: 0.75rem 1.5rem;
   border-radius: 0.5rem;
   border: none;
