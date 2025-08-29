@@ -7,7 +7,16 @@
     <div v-if="error" class="error-message">{{ error }}</div>
 
     <div v-if="student" class="student-details-card">
-      <h2 class="student-details-title">{{ student.name }} ({{ student.studentNumber }})</h2>
+      <div class="student-details-header">
+        <h2 class="student-details-title">{{ student.name }} ({{ student.studentNumber }})</h2>
+        <button @click="navigateToEditStudent(student.id!)" class="edit-student-button">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L7.5 21H3v-4.5L15.232 5.232z" />
+          </svg>
+          Bewerken
+        </button>
+      </div>
+
       <div class="detail-group">
         <p class="detail-label">Adres:</p>
         <p class="detail-value">{{ student.address }}</p>
@@ -73,7 +82,7 @@ const fetchStudentDetail = async () => {
   try {
     const studentId = route.params.id as string;
 
-    if (!studentId || studentId.length !== 24) { // Basic check for ObjectId length
+    if (!studentId || studentId.length !== 24) {
       error.value = "Ongeldig student ID formaat.";
       loading.value = false;
       return;
@@ -81,9 +90,8 @@ const fetchStudentDetail = async () => {
 
     const response = await axios.get<Student>(`/api/students/${studentId}`);
     student.value = response.data;
-  } catch (err: any) { // Catch any type of error
+  } catch (err: any) {
     console.error("Fout bij het ophalen van studentdetails:", err);
-    // Attempt to get a more specific error message from the backend response
     if (err.response && err.response.data && err.response.data.title) {
       error.value = `Fout: ${err.response.data.title} - ${err.response.data.detail || ''}`;
     } else {
@@ -96,6 +104,10 @@ const fetchStudentDetail = async () => {
 
 const getInvoiceFileUrl = (invoiceId: string) => {
   return `/api/invoices/file/${invoiceId}`;
+};
+
+const navigateToEditStudent = (id: string) => {
+  router.push({ name: 'EditStudent', params: { id } });
 };
 
 onMounted(fetchStudentDetail);
@@ -151,11 +163,34 @@ onMounted(fetchStudentDetail);
   margin-top: 2rem;
 }
 
+.student-details-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
 .student-details-title {
   font-size: 1.5rem; /* 24px */
   font-weight: 600;
-  color: var(--color-background);
-  margin-bottom: 1.5rem;
+  color: var(--color-text-dark); /* Changed to text-dark for better contrast */
+}
+
+.edit-student-button {
+  background-color: var(--color-primary);
+  color: var(--color-white);
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  font-weight: 600;
+  transition: background-color 0.2s ease;
+}
+
+.edit-student-button:hover {
+  background-color: #4078e0; /* Darker shade of primary */
 }
 
 .detail-group {
@@ -166,24 +201,24 @@ onMounted(fetchStudentDetail);
 
 .detail-label {
   font-weight: 500;
-  color: var(--color-background);
+  color: var(--color-text-dark); /* Changed to text-dark for better contrast */
   width: 150px;
 }
 
 .detail-value {
-  color: var(--color-background);
+  color: var(--color-text-regular); /* Changed to text-regular for better contrast */
   flex: 1;
 }
 
 .detail-link {
-  color: var(--color-white);
+  color: var(--color-primary);
   text-decoration: underline;
 }
 
 .invoices-title {
   font-size: 1.5rem;
   font-weight: 600;
-  color: var(--color-background);
+  color: var(--color-text-dark); /* Changed to text-dark for better contrast */
   margin-top: 2rem;
   margin-bottom: 1rem;
 }
@@ -196,7 +231,8 @@ onMounted(fetchStudentDetail);
 
 .invoice-item {
   padding: 1rem 1.5rem;
-  background-color: var(--color-light-gray);
+  border-bottom: 1px solid var(--color-border);
+  background-color: var(--color-background-light);
 }
 
 .invoice-item:last-child {
@@ -205,12 +241,12 @@ onMounted(fetchStudentDetail);
 
 .invoice-item p {
   margin-bottom: 0.25rem;
-  color: var(--color-background);
+  color: var(--color-text-regular); /* Changed to text-regular for better contrast */
 }
 
 .back-button {
   background-color: var(--color-primary);
-  color: var( --color-background-light);
+  color: var(--color-white);
   padding: 0.75rem 1.5rem;
   border-radius: 0.5rem;
   border: none;
@@ -219,4 +255,7 @@ onMounted(fetchStudentDetail);
   transition: background-color 0.2s ease;
 }
 
+.back-button:hover {
+  background-color: #4078e0; /* Darker shade of primary */
+}
 </style>

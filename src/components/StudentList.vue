@@ -3,14 +3,21 @@
     <h1 class="page-title">Ledenboek</h1>
     <p class="page-description">Overzicht van alle geregistreerde studenten.</p>
 
+    <button @click="navigateToAddStudent" class="add-student-button">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+      </svg>
+      Nieuwe Student Toevoegen
+    </button>
+
     <div v-if="loading" class="loading-message">Laden van studenten...</div>
     <div v-if="error" class="error-message">{{ error }}</div>
 
     <div v-if="students.length" class="student-cards-grid">
       <div v-for="student in students" :key="student.id" class="student-card" @click="viewStudentDetail(student.id!)">
-        <h2 class="student-card-title">{{ student.name }}</h2>
-        <p class="student-card-detail">Studentnummer: {{ student.studentNumber }}</p>
-        <p class="student-card-detail">Email: {{ student.email }}</p>
+        <h2 class="student-card-title">{{ student.name || 'Onbekende Naam' }}</h2>
+        <p class="student-card-detail">Studentnummer: {{ student.studentNumber || 'N.v.t.' }}</p>
+        <p class="student-card-detail">Email: {{ student.email || 'N.v.t.' }}</p>
       </div>
     </div>
     <div v-else-if="!loading && !error" class="no-data-message">Geen studenten gevonden.</div>
@@ -21,7 +28,7 @@
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
-import type { Student } from '../types/Student'; // Import the Student interface
+import type { Student } from '../types/Student';
 
 const students = ref<Student[]>([]);
 const loading = ref(true);
@@ -30,7 +37,6 @@ const router = useRouter();
 
 const fetchStudents = async () => {
   try {
-    // IMPORTANT: Use the relative path /api/students because Nginx is proxying
     const response = await axios.get<Student[]>('/api/students');
     students.value = response.data;
   } catch (err) {
@@ -43,6 +49,10 @@ const fetchStudents = async () => {
 
 const viewStudentDetail = (id: string) => {
   router.push({ name: 'StudentDetail', params: { id } });
+};
+
+const navigateToAddStudent = () => {
+  router.push({ name: 'AddStudent' });
 };
 
 onMounted(fetchStudents);
@@ -70,6 +80,24 @@ onMounted(fetchStudents);
   margin-top: 0.5rem;
   color: var(--color-text-regular);
   margin-bottom: 1.5rem;
+}
+
+.add-student-button {
+  background-color: var(--color-primary);
+  color: var(--color-white);
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  border: none;
+  cursor: pointer;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  font-weight: 600;
+  transition: background-color 0.2s ease;
+}
+
+.add-student-button:hover {
+  background-color: #4078e0; /* Darker shade of primary */
 }
 
 .loading-message, .error-message, .no-data-message {
@@ -118,13 +146,13 @@ onMounted(fetchStudents);
 .student-card-title {
   font-size: 1.25rem; /* 20px */
   font-weight: 600;
-  color: var(--color-background);
+  color: var(--color-text-dark); /* Changed to text-dark for better contrast */
   margin-bottom: 0.5rem;
 }
 
 .student-card-detail {
   font-size: 0.875rem; /* 14px */
-  color: var(--color-background);
+  color: var(--color-text-regular); /* Changed to text-regular for better contrast */
   margin-bottom: 0.25rem;
 }
 </style>
