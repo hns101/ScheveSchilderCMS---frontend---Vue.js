@@ -3,18 +3,17 @@
     <div class="pdf-viewer-header">
       <h1 class="page-title">{{ title }}</h1>
       <a :href="pdfUrl" class="download-button" download>
-        <svg xmlns="http://www.w3.org/2000/svg" class="download-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
         </svg>
         Download PDF
       </a>
     </div>
 
     <div v-if="loading" class="loading-message">Laden van PDF...</div>
-    <div v-if="error" class="error-message">{{ error }}</div>
+    <div v-else-if="error" class="error-message">{{ error }}</div>
 
-    <div class="pdf-container">
-      <!-- We'll use a simple iframe to embed the PDF -->
+    <div v-else class="pdf-container">
       <iframe :src="pdfUrl" frameborder="0"></iframe>
     </div>
 
@@ -25,32 +24,45 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import axios from 'axios';
 
 const route = useRoute();
 const router = useRouter();
 
-const title = ref('PDF Viewer');
+const title = ref('');
 const pdfUrl = ref('');
 const loading = ref(true);
 const error = ref<string | null>(null);
 
-onMounted(() => {
-  const fileId = route.params.id as string;
-  const fileType = route.params.type as string; // 'student' or 'invoice'
+const fetchPdf = async () => {
+  const { type, id } = route.params;
+  let apiEndpoint = '';
 
-  if (fileId && fileType) {
-    if (fileType === 'student') {
-      title.value = 'Registratiedocument';
-      pdfUrl.value = `/api/students/${fileId}/registration-document`;
-    } else if (fileType === 'invoice') {
-      title.value = `Factuur: ${fileId}`;
-      pdfUrl.value = `/api/invoices/file/${fileId}`;
-    }
+  if (type === 'student' && typeof id === 'string') {
+    title.value = 'Registratiedocument';
+    apiEndpoint = `/api/students/${id}/registration-document`;
+  } else if (type === 'invoice' && typeof id === 'string') {
+    title.value = `Factuur ${id.substring(0, 8)}...`;
+    apiEndpoint = `/api/invoices/file/${id}`;
   } else {
-    error.value = 'Geen PDF-bestand geselecteerd.';
+    error.value = 'Ongeldige documentparameters.';
+    loading.value = false;
+    return;
   }
-  loading.value = false;
-});
+
+  try {
+    const response = await axios.get(apiEndpoint, { responseType: 'blob' });
+    const blob = new Blob([response.data], { type: 'application/pdf' });
+    pdfUrl.value = URL.createObjectURL(blob);
+  } catch (err) {
+    console.error(`Fout bij het laden van de PDF vanaf ${apiEndpoint}:`, err);
+    error.value = 'Kan de PDF niet laden. Probeer het opnieuw.';
+  } finally {
+    loading.value = false;
+  }
+};
+
+onMounted(fetchPdf);
 </script>
 
 <style scoped>
@@ -72,40 +84,34 @@ onMounted(() => {
 }
 
 .page-title {
-  font-size: 1.875rem;
+  font-size: 1.875rem; /* 30px */
   font-weight: 600;
   color: var(--color-text-dark);
-  margin-bottom: 0;
+  margin: 0;
 }
 
 .download-button {
   background-color: var(--color-primary);
   color: var(--color-background-light);
-  padding: 0.75rem 1.5rem;
+  padding: 0.5rem 1rem;
   border-radius: 0.5rem;
   border: none;
   cursor: pointer;
   display: flex;
   align-items: center;
+  gap: 0.5rem;
   font-weight: 600;
   text-decoration: none;
   transition: background-color 0.2s ease;
 }
 
 .download-button:hover {
-  background-color: #b67949;
-}
-
-.download-icon {
-  width: 1.25rem;
-  height: 1.25rem;
-  margin-right: 0.5rem;
+  background-color: #b0753a;
 }
 
 .pdf-container {
   border: 1px solid var(--color-border);
-  height: 70vh;
-  margin-bottom: 1rem;
+  height: 80vh;
 }
 
 .pdf-container iframe {
@@ -131,17 +137,17 @@ onMounted(() => {
 }
 
 .back-button {
-  background-color: var(--color-primary);
+  background-color: var(--color-text-light);
   color: var(--color-background-light);
   padding: 0.75rem 1.5rem;
   border-radius: 0.5rem;
   border: none;
   cursor: pointer;
-  margin-top: 1rem;
+  margin-top: 2rem;
   transition: background-color 0.2s ease;
 }
 
 .back-button:hover {
-  background-color: #b67949;
+  background-color: #8a939e;
 }
 </style>

@@ -60,7 +60,7 @@
             <button type="button" @click="clearFile" class="delete-file-button">Verwijder</button>
           </div>
           <div v-if="isEditing && formData.registrationDocumentPath && !file" class="file-info-actions">
-            <a :href="getRegistrationDocumentUrl(formData.registrationDocumentPath)" target="_blank" class="detail-link">Bekijk Huidig Document</a>
+            <a :href="getRegistrationDocumentUrl()" target="_blank" class="detail-link">Bekijk Huidig Document</a>
             <button type="button" @click="deleteExistingDocument" class="delete-file-button">Verwijder Huidig</button>
           </div>
           <div v-if="fileUploadMessage" :class="['message', fileUploadStatus]">{{ fileUploadMessage }}</div>
@@ -82,7 +82,7 @@
 <script setup lang="ts">
 import { ref, watch, computed, onMounted } from 'vue';
 import axios from 'axios';
-import { useRouter, useRoute } from 'vue-router';
+import { useRouter } from 'vue-router';
 import type { Student } from '../types/Student';
 
 const props = defineProps<{
@@ -90,7 +90,6 @@ const props = defineProps<{
 }>();
 
 const router = useRouter();
-const route = useRoute();
 
 const isEditing = computed(() => !!props.id);
 
@@ -109,7 +108,6 @@ const submitMessage = ref<string | null>(null);
 const submitStatus = ref<'success' | 'error' | null>(null);
 const fileUploadMessage = ref<string | null>(null);
 const fileUploadStatus = ref<'success' | 'error' | null>(null);
-
 
 const fetchStudentData = async (studentId: string) => {
   loadingStudent.value = true;
@@ -175,15 +173,8 @@ const deleteExistingDocument = async () => {
   }
 };
 
-const getRegistrationDocumentUrl = (filePath: string) => {
-  // This URL is what the backend's FileService.SaveStudentDocument returns.
-  // It's a full server path, so we need to construct a public URL.
-  // We'll use the StudentId to correctly build the URL for a Get request.
-  const studentId = formData.value.id;
-  if (studentId) {
-    return `/api/students/${studentId}/registration-document-file`;
-  }
-  return '#';
+const getRegistrationDocumentUrl = () => {
+  return `/api/students/${formData.value.id}/registration-document`;
 };
 
 
@@ -195,15 +186,12 @@ const submitForm = async () => {
   try {
     let studentResponse;
 
-    // Handle PUT request for editing
     if (isEditing.value && formData.value.id) {
       studentResponse = await axios.put(`/api/students/${formData.value.id}`, formData.value);
     } else {
-      // Handle POST request for new student
       studentResponse = await axios.post('/api/students', formData.value);
     }
 
-    // Handle file upload if a file is selected
     if (file.value) {
       const studentId = studentResponse.data.id || formData.value.id;
       const formDataToSend = new FormData();
@@ -220,7 +208,6 @@ const submitForm = async () => {
     submitMessage.value = `Student succesvol ${isEditing.value ? 'bijgewerkt' : 'toegevoegd'}!`;
     submitStatus.value = 'success';
 
-    // Clear form for new entry if adding
     if (!isEditing.value) {
       formData.value = {
         name: '', studentNumber: '', address: '', email: '', phoneNumber: '',
@@ -245,6 +232,12 @@ const submitForm = async () => {
 const cancelForm = () => {
   router.back();
 };
+
+watch(() => props.id, (newId) => {
+  if (newId) {
+    fetchStudentData(newId);
+  }
+}, { immediate: true });
 
 onMounted(() => {
   if (props.id) {
@@ -384,5 +377,4 @@ onMounted(() => {
 .delete-file-button:hover {
   background-color: #dc2626;
 }
-
 </style>

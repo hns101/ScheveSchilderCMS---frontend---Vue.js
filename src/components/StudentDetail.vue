@@ -55,7 +55,7 @@
       </div>
       <div class="detail-group" v-if="student.registrationDocumentPath">
         <p class="detail-label">Registratiedocument:</p>
-        <a :href="student.registrationDocumentPath" target="_blank" class="detail-link">Bekijk document</a>
+        <button @click="viewDocument('student', student.id!)" class="edit-student-button">Bekijk document</button>
       </div>
 
       <h3 class="invoices-title">Facturen</h3>
@@ -65,7 +65,7 @@
           <p>Datum: {{ new Date(invoice.date).toLocaleDateString() }}</p>
           <p>Bedrag: {{ invoice.amountTotal }} (BTW: {{ invoice.vat }})</p>
           <p>Beschrijving: {{ invoice.description }}</p>
-          <a :href="getInvoiceFileUrl(invoice.id!)" target="_blank" class="detail-link">Bekijk PDF</a>
+          <button @click="viewDocument('invoice', invoice.id!)" class="edit-student-button">Bekijk PDF</button>
         </div>
       </div>
       <div v-else class="no-data-message">Geen facturen gevonden voor deze student.</div>
@@ -110,8 +110,16 @@ const fetchStudentDetail = async () => {
   }
 };
 
+const viewDocument = (type: 'student' | 'invoice', id: string) => {
+  router.push({ name: 'PdfViewer', params: { type, id } });
+};
+
 const getInvoiceFileUrl = (invoiceId: string) => {
   return `/api/invoices/file/${invoiceId}`;
+};
+
+const getRegistrationDocumentUrl = (studentId: string) => {
+  return `/api/students/${studentId}/registration-document`;
 };
 
 const navigateToEditStudent = (id: string) => {

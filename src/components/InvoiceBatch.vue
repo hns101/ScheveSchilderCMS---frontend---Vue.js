@@ -74,7 +74,7 @@
             <td>{{ invoice.vat }}</td>
             <td>{{ invoice.description }}</td>
             <td>
-              <a :href="getInvoiceFileUrl(invoice.id!)" target="_blank" class="table-action-link">Bekijk PDF</a>
+              <button @click="viewDocument('invoice', invoice.id!)" class="table-action-link">Bekijk PDF</button>
               <button @click="deleteInvoice(invoice.id!)" class="table-action-button-ib">Verwijder</button>
             </td>
           </tr>
@@ -89,9 +89,11 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
-import type { Student, Invoice } from '../types/Student'; // Import interfaces
+import { useRouter } from 'vue-router';
+import type { Student, Invoice } from '../types/Student';
 
-// Reactive state for batch generation form
+const router = useRouter();
+
 const batchRequest = ref({
   studentIds: [] as string[],
   description: '',
@@ -103,18 +105,13 @@ const generating = ref(false);
 const generationMessage = ref<string | null>(null);
 const generationStatus = ref<'success' | 'error' | null>(null);
 
-// Reactive state for student selection
 const availableStudents = ref<Student[]>([]);
 const loadingStudents = ref(true);
 
-// Reactive state for displaying all invoices
 const allInvoices = ref<Invoice[]>([]);
 const loadingInvoices = ref(true);
 const invoiceError = ref<string | null>(null);
 
-// --- Methods ---
-
-// Fetches all students for the multi-select dropdown
 const fetchAvailableStudents = async () => {
   try {
     const response = await axios.get<Student[]>('/api/students');
@@ -126,7 +123,6 @@ const fetchAvailableStudents = async () => {
   }
 };
 
-// Fetches all invoices for the list
 const fetchAllInvoices = async () => {
   try {
     const response = await axios.get<Invoice[]>('/api/invoices');
@@ -139,7 +135,6 @@ const fetchAllInvoices = async () => {
   }
 };
 
-// Handles the invoice generation form submission
 const generateInvoices = async () => {
   generating.value = true;
   generationMessage.value = null;
@@ -149,9 +144,7 @@ const generateInvoices = async () => {
     const response = await axios.post('/api/invoices/batch-generate', batchRequest.value);
     generationMessage.value = `Succesvol ${response.data.length} facturen gegenereerd!`;
     generationStatus.value = 'success';
-    // Refresh the list of all invoices after generation
     await fetchAllInvoices();
-    // Reset form
     batchRequest.value = { studentIds: [], description: '', amountTotal: 0, vat: 0 };
   } catch (err: any) {
     console.error("Fout bij het genereren van facturen:", err);
@@ -162,25 +155,22 @@ const generateInvoices = async () => {
   }
 };
 
-// Helper to get student name for invoice list
 const getStudentName = (studentId: string) => {
   const student = availableStudents.value.find(s => s.id === studentId);
   return student ? student.name : 'Onbekend';
 };
 
-// Generates the URL for viewing an invoice PDF
-const getInvoiceFileUrl = (invoiceId: string) => {
-  return `/api/invoices/file/${invoiceId}`;
+const viewDocument = (type: 'student' | 'invoice', id: string) => {
+  router.push({ name: 'PdfViewer', params: { type, id } });
 };
 
-// Handles deleting an invoice
 const deleteInvoice = async (invoiceId: string) => {
   if (confirm('Weet u zeker dat u deze factuur wilt verwijderen?')) {
     try {
       await axios.delete(`/api/invoices/${invoiceId}`);
       generationMessage.value = 'Factuur succesvol verwijderd.';
       generationStatus.value = 'success';
-      await fetchAllInvoices(); // Refresh the list
+      await fetchAllInvoices();
     } catch (err: any) {
       console.error("Fout bij het verwijderen van factuur:", err);
       generationMessage.value = `Fout bij het verwijderen van factuur: ${err.response?.data || err.message}`;
@@ -189,17 +179,14 @@ const deleteInvoice = async (invoiceId: string) => {
   }
 };
 
-// Selects all available students
 const selectAllStudents = () => {
   batchRequest.value.studentIds = availableStudents.value.map(s => s.id!);
 };
 
-// Deselects all students
 const deselectAllStudents = () => {
   batchRequest.value.studentIds = [];
 };
 
-// --- Lifecycle Hook ---
 onMounted(() => {
   fetchAvailableStudents();
   fetchAllInvoices();
@@ -218,7 +205,7 @@ onMounted(() => {
 }
 
 .page-title {
-  font-size: 1.875rem; /* 30px */
+  font-size: 1.875rem;
   font-weight: 600;
   color: var(--color-text-dark);
   margin-bottom: 1rem;
@@ -240,7 +227,7 @@ onMounted(() => {
 }
 
 .form-title {
-  font-size: 1.5rem; /* 24px */
+  font-size: 1.5rem;
   font-weight: 600;
   color: var(--color-background);
   margin-bottom: 1.5rem;
@@ -270,11 +257,10 @@ onMounted(() => {
 
 .form-input:focus, .form-select:focus {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 2px rgba(var(--color-background), 0.2); /* Adjust if you define RGB for primary */
+  box-shadow: 0 0 0 2px rgba(var(--color-background), 0.2);
   outline: none;
 }
 
-/* New styles for checkbox list and buttons */
 .student-selection-actions {
   display: flex;
   gap: 0.5rem;
@@ -293,7 +279,7 @@ onMounted(() => {
 }
 
 .select-all-button:hover, .deselect-all-button:hover {
-  background-color: #4078e0; /* Darker shade of primary */
+  background-color: #4078e0;
 }
 
 .student-checkbox-list {
@@ -345,7 +331,7 @@ onMounted(() => {
 }
 
 .submit-button:hover:not(:disabled) {
-  background-color: var(--color-primary); /* Requires a CSS preprocessor or manual calculation */
+  background-color: var(--color-primary);
 }
 
 .submit-button:disabled {
@@ -362,13 +348,13 @@ onMounted(() => {
 }
 
 .message.success {
-  background-color: #d1fae5; /* light green */
-  color: #059669; /* green */
+  background-color: #d1fae5;
+  color: #059669;
 }
 
 .message.error {
-  background-color: #fee2e2; /* light red */
-  color: #ef4444; /* red */
+  background-color: #fee2e2;
+  color: #ef4444;
 }
 
 .loading-message, .error-message, .no-data-message {
@@ -384,8 +370,8 @@ onMounted(() => {
 }
 
 .error-message {
-  background-color: #fee2e2; /* light red */
-  color: #ef4444; /* red */
+  background-color: #fee2e2;
+  color: #ef4444;
 }
 
 .no-data-message {
@@ -431,7 +417,7 @@ onMounted(() => {
 }
 
 .table-action-button-ib {
-  background-color: #8f4747; /* red */
+  background-color: #8f4747;
   color: var(--color-background-light);
   padding: 0.5rem 1rem;
   border-radius: 0.5rem;
