@@ -406,15 +406,20 @@ onMounted(() => {
   color: var(--color-background);
 }
 
-.invoice-table tbody :hover {
-  background-color: var(--color-background-light);
-}
+
 
 .table-action-link {
-  color: var(--color-white);
-  text-decoration: underline;
+  color: var(--color-background-light);
+  background-color: var(--color-primary);
   margin-right: 0.5rem;
+  margin-bottom: 4px;
+  padding: 0.5rem 0.7rem 0.5rem 0.7rem;
+  border-radius: 0.5rem;
+  border: none;
+  text-decoration: none;
+  cursor: pointer;
 }
+
 
 .table-action-button-ib {
   background-color: #8f4747;
