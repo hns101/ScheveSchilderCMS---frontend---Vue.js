@@ -3,6 +3,7 @@ import StudentList from '../components/StudentList.vue';
 import StudentDetail from '../components/StudentDetail.vue';
 import StudentForm from '../components/StudentForm.vue';
 import InvoiceBatch from '../components/InvoiceBatch.vue';
+import PdfViewer from '../components/PdfViewer.vue';
 
 const routes: Array<RouteRecordRaw> = [
     { path: '/', redirect: '/students' },
@@ -10,7 +11,8 @@ const routes: Array<RouteRecordRaw> = [
     { path: '/students/:id', name: 'StudentDetail', component: StudentDetail },
     { path: '/students/new', name: 'AddStudent', component: StudentForm },
     { path: '/students/:id/edit', name: 'EditStudent', component: StudentForm, props: true },
-    { path: '/invoices', name: 'InvoiceBatch', component: InvoiceBatch }
+    { path: '/invoices', name: 'InvoiceBatch', component: InvoiceBatch },
+    { path: '/pdf/:type/:id', name: 'PdfViewer', component: PdfViewer }
 ];
 
 const router = createRouter({
