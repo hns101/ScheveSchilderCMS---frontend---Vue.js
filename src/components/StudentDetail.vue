@@ -123,7 +123,7 @@ const deleteStudent = async (id: string) => {
     try {
       await axios.delete(`/api/students/${id}`);
       alert('Student succesvol verwijderd!');
-      router.push({ name: 'StudentList' }); // Navigate back to the list after deletion
+      router.push({ name: 'StudentList' });
     } catch (err: any) {
       console.error("Fout bij het verwijderen van student:", err);
       alert(`Fout bij het verwijderen van student: ${err.response?.data?.title || err.message}`);

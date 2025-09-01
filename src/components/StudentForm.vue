@@ -51,9 +51,19 @@
           <input type="date" id="dateOfRegistration" v-model="formattedDateOfRegistration" class="form-input" required />
         </div>
 
-        <div class="form-group" v-if="isEditing && formData.registrationDocumentPath">
-          <p class="form-label">Registratiedocument:</p>
-          <a :href="formData.registrationDocumentPath" target="_blank" class="detail-link">Bekijk document</a>
+        <!-- File Upload Section -->
+        <div class="form-group">
+          <label for="registrationDocument" class="form-label">Registratiedocument (PDF):</label>
+          <input type="file" id="registrationDocument" ref="fileInput" @change="handleFileChange" class="form-input" accept=".pdf" />
+          <div v-if="file" class="file-info-actions">
+            <span class="file-name">{{ file.name }}</span>
+            <button type="button" @click="clearFile" class="delete-file-button">Verwijder</button>
+          </div>
+          <div v-if="isEditing && formData.registrationDocumentPath && !file" class="file-info-actions">
+            <a :href="getRegistrationDocumentUrl(formData.registrationDocumentPath)" target="_blank" class="detail-link">Bekijk Huidig Document</a>
+            <button type="button" @click="deleteExistingDocument" class="delete-file-button">Verwijder Huidig</button>
+          </div>
+          <div v-if="fileUploadMessage" :class="['message', fileUploadStatus]">{{ fileUploadMessage }}</div>
         </div>
 
         <div class="form-actions">
@@ -79,7 +89,6 @@ const props = defineProps<{
   id?: string; // Prop to receive student ID for editing
 }>();
 
-const emit = defineEmits(['submitted', 'cancel']);
 const router = useRouter();
 const route = useRoute();
 
@@ -90,11 +99,17 @@ const formData = ref<Student>({
   emergencyContact: '', bankName: '', accountNumber: '', dateOfRegistration: new Date(),
 });
 
+const fileInput = ref<HTMLInputElement | null>(null);
+const file = ref<File | null>(null);
+
 const loadingStudent = ref(false);
 const studentFetchError = ref<string | null>(null);
 const submitting = ref(false);
 const submitMessage = ref<string | null>(null);
 const submitStatus = ref<'success' | 'error' | null>(null);
+const fileUploadMessage = ref<string | null>(null);
+const fileUploadStatus = ref<'success' | 'error' | null>(null);
+
 
 const fetchStudentData = async (studentId: string) => {
   loadingStudent.value = true;
@@ -113,17 +128,6 @@ const fetchStudentData = async (studentId: string) => {
   }
 };
 
-watch(() => props.id, (newId) => {
-  if (newId) {
-    fetchStudentData(newId);
-  } else {
-    formData.value = {
-      name: '', studentNumber: '', address: '', email: '', phoneNumber: '',
-      emergencyContact: '', bankName: '', accountNumber: '', dateOfRegistration: new Date(),
-    };
-  }
-}, { immediate: true });
-
 const formattedDateOfRegistration = computed({
   get: () => {
     if (formData.value.dateOfRegistration) {
@@ -139,26 +143,95 @@ const formattedDateOfRegistration = computed({
   }
 });
 
+const handleFileChange = (event: Event) => {
+  const target = event.target as HTMLInputElement;
+  if (target.files && target.files.length > 0) {
+    file.value = target.files[0];
+    fileUploadMessage.value = null;
+    fileUploadStatus.value = null;
+  }
+};
+
+const clearFile = () => {
+  file.value = null;
+  if (fileInput.value) {
+    fileInput.value.value = '';
+  }
+  fileUploadMessage.value = null;
+  fileUploadStatus.value = null;
+};
+
+const deleteExistingDocument = async () => {
+  if (!formData.value.id) return;
+  try {
+    await axios.delete(`/api/students/${formData.value.id}/registration-document`);
+    formData.value.registrationDocumentPath = undefined;
+    fileUploadMessage.value = 'Document succesvol verwijderd.';
+    fileUploadStatus.value = 'success';
+  } catch (err: any) {
+    console.error("Fout bij het verwijderen van document:", err);
+    fileUploadMessage.value = `Fout bij verwijderen: ${err.response?.data?.title || err.message}`;
+    fileUploadStatus.value = 'error';
+  }
+};
+
+const getRegistrationDocumentUrl = (filePath: string) => {
+  // This URL is what the backend's FileService.SaveStudentDocument returns.
+  // It's a full server path, so we need to construct a public URL.
+  // We'll use the StudentId to correctly build the URL for a Get request.
+  const studentId = formData.value.id;
+  if (studentId) {
+    return `/api/students/${studentId}/registration-document-file`;
+  }
+  return '#';
+};
+
+
 const submitForm = async () => {
   submitting.value = true;
   submitMessage.value = null;
   submitStatus.value = null;
 
   try {
+    let studentResponse;
+
+    // Handle PUT request for editing
     if (isEditing.value && formData.value.id) {
-      await axios.put(`/api/students/${formData.value.id}`, formData.value);
-      submitMessage.value = 'Student succesvol bijgewerkt!';
-      submitStatus.value = 'success';
+      studentResponse = await axios.put(`/api/students/${formData.value.id}`, formData.value);
     } else {
-      await axios.post('/api/students', formData.value);
-      submitMessage.value = 'Student succesvol toegevoegd!';
-      submitStatus.value = 'success';
+      // Handle POST request for new student
+      studentResponse = await axios.post('/api/students', formData.value);
+    }
+
+    // Handle file upload if a file is selected
+    if (file.value) {
+      const studentId = studentResponse.data.id || formData.value.id;
+      const formDataToSend = new FormData();
+      formDataToSend.append('file', file.value);
+      await axios.post(`/api/students/${studentId}/registration-document`, formDataToSend, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      fileUploadMessage.value = 'Document succesvol geüpload!';
+      fileUploadStatus.value = 'success';
+    }
+
+    submitMessage.value = `Student succesvol ${isEditing.value ? 'bijgewerkt' : 'toegevoegd'}!`;
+    submitStatus.value = 'success';
+
+    // Clear form for new entry if adding
+    if (!isEditing.value) {
       formData.value = {
         name: '', studentNumber: '', address: '', email: '', phoneNumber: '',
         emergencyContact: '', bankName: '', accountNumber: '', dateOfRegistration: new Date(),
       };
+      if (fileInput.value) {
+        fileInput.value.value = '';
+      }
+      file.value = null;
     }
-    emit('submitted');
+
     router.back();
   } catch (err: any) {
     console.error("Fout bij het opslaan van student:", err);
@@ -170,7 +243,6 @@ const submitForm = async () => {
 };
 
 const cancelForm = () => {
-  emit('cancel');
   router.back();
 };
 
@@ -212,21 +284,26 @@ onMounted(() => {
   margin-bottom: 0.5rem;
 }
 
-.form-input, .form-select {
+.form-input, .form-select, .form-file-input {
   width: 100%;
   padding: 0.75rem 1rem;
   border: 1px solid var(--color-border);
   border-radius: 0.5rem;
   font-size: 1rem;
-  color: var(--color-background); /* Corrected to text-regular */
+  color: var(--color-background);
   background-color: var(--color-background-light);
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.form-input:focus, .form-select:focus {
-  border-color: var(--color-primary); /* Corrected to primary */
-  box-shadow: 0 0 0 2px rgba(82, 139, 255, 0.2); /* Using RGB for primary color */
+.form-input:focus, .form-select:focus, .form-file-input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgba(82, 139, 255, 0.2);
   outline: none;
+}
+
+.form-file-input {
+  height: auto;
+  padding: 0.5rem;
 }
 
 .form-actions {
@@ -247,7 +324,7 @@ onMounted(() => {
 }
 
 .submit-button:hover:not(:disabled) {
-  background-color: #b67949; /* Darker shade of primary */
+  background-color: #b67949;
 }
 
 .submit-button:disabled {
@@ -261,7 +338,7 @@ onMounted(() => {
 }
 
 .cancel-button:hover {
-  background-color: #8a939e; /* Darker shade of light text */
+  background-color: #8a939e;
 }
 
 .message {
@@ -273,17 +350,39 @@ onMounted(() => {
 }
 
 .message.success {
-  background-color: #d1fae5; /* light green */
-  color: #059669; /* green */
+  background-color: #d1fae5;
+  color: #059669;
 }
 
 .message.error {
-  background-color: #fee2e2; /* light red */
-  color: #ef4444; /* red */
+  background-color: #fee2e2;
+  color: #ef4444;
 }
 
 .detail-link {
   color: var(--color-primary);
   text-decoration: underline;
 }
+
+.file-info-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.delete-file-button {
+  background-color: #ef4444;
+  color: var(--color-background-light);
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.delete-file-button:hover {
+  background-color: #dc2626;
+}
+
 </style>
