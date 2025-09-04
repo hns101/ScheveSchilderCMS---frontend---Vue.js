@@ -405,9 +405,6 @@ onMounted(() => {
   background-color: var( --color-light-gray);
   color: var(--color-background);
 }
-
-
-
 .table-action-link {
   color: var(--color-background-light);
   background-color: var(--color-primary);

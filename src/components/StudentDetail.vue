@@ -114,14 +114,6 @@ const viewDocument = (type: 'student' | 'invoice', id: string) => {
   router.push({ name: 'PdfViewer', params: { type, id } });
 };
 
-const getInvoiceFileUrl = (invoiceId: string) => {
-  return `/api/invoices/file/${invoiceId}`;
-};
-
-const getRegistrationDocumentUrl = (studentId: string) => {
-  return `/api/students/${studentId}/registration-document`;
-};
-
 const navigateToEditStudent = (id: string) => {
   router.push({ name: 'EditStudent', params: { id } });
 };
