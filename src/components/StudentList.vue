@@ -28,9 +28,9 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import axios from 'axios';
+import api from '../services/api';
 import { useRouter } from 'vue-router';
-import type { Student } from '../types/Student'; // Import the Student interface
+import type { Student } from '../types/Student';
 
 const students = ref<Student[]>([]);
 const loading = ref(true);
@@ -39,11 +39,11 @@ const router = useRouter();
 
 const fetchStudents = async () => {
   try {
-    const response = await axios.get<Student[]>('/api/students');
-    students.value = response.data;
-  } catch (err) {
+    const response = await api.get<Student[]>('/api/students');
+    students.value = response.data || [];
+  } catch (err: any) {
     console.error("Fout bij het ophalen van studenten:", err);
-    error.value = "Er is een fout opgetreden bij het laden van studenten.";
+    error.value = err.response?.data?.message || "Er is een fout opgetreden bij het laden van studenten.";
   } finally {
     loading.value = false;
   }
@@ -74,48 +74,48 @@ onMounted(fetchStudents);
 .student-list-header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start; /* Align items to the top */
-  margin-bottom: 1.5rem; /* Add some space below the header */
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
 }
 
 .page-title {
-  font-size: 1.875rem; /* 30px */
+  font-size: 1.875rem;
   font-weight: 600;
   color: var(--color-text-dark);
-  margin-bottom: 0.5rem; /* Reduced margin to align better with button */
+  margin-bottom: 0.5rem;
 }
 
 .page-description {
   margin-top: 0.5rem;
   color: var(--color-text-regular);
-  margin-bottom: 0; /* Remove bottom margin as it's handled by header */
+  margin-bottom: 0;
 }
 
 .add-student-button {
   background-color: var(--color-primary);
-  color: var(--color-background-light); /* Reverted to original color */
-  padding: 0.5rem; /* Made smaller for just an icon */
-  width: 2.5rem; /* Fixed width for a square button */
-  height: 2.5rem; /* Fixed height for a square button */
+  color: var(--color-background-light);
+  padding: 0.5rem;
+  width: 2.5rem;
+  height: 2.5rem;
   border-radius: 0.5rem;
   border: none;
   cursor: pointer;
   display: flex;
   align-items: center;
-  justify-content: center; /* Center the icon */
+  justify-content: center;
   font-weight: 600;
   transition: background-color 0.2s ease;
 }
 
 .add-student-button:hover {
-  background-color: #b0753a; /* Darker shade of primary */
+  background-color: #b0753a;
 }
 
 .add-student-icon {
-  width: 1.5rem; /* Icon size */
-  height: 1.5rem; /* Icon size */
-  stroke: var(--color-background-light); /* Color of the SVG icon */
-  margin-right: 0; /* Remove margin-right as there's no text */
+  width: 1.5rem;
+  height: 1.5rem;
+  stroke: var(--color-background-light);
+  margin-right: 0;
 }
 
 .loading-message, .error-message, .no-data-message {
@@ -131,8 +131,8 @@ onMounted(fetchStudents);
 }
 
 .error-message {
-  background-color: #fee2e2; /* light red */
-  color: #ef4444; /* red */
+  background-color: #fee2e2;
+  color: #ef4444;
 }
 
 .no-data-message {
@@ -162,15 +162,15 @@ onMounted(fetchStudents);
 }
 
 .student-card-title {
-  font-size: 1.25rem; /* 20px */
+  font-size: 1.25rem;
   font-weight: 600;
-  color: var(--color-background); /* Reverted to original color */
+  color: var(--color-background);
   margin-bottom: 0.5rem;
 }
 
 .student-card-detail {
-  font-size: 0.875rem; /* 14px */
-  color: var(--color-background); /* Reverted to original color */
+  font-size: 0.875rem;
+  color: var(--color-background);
   margin-bottom: 0.25rem;
 }
 </style>
