@@ -125,6 +125,34 @@
         <li>⚠️ Zorg ervoor dat er ruimte is voor tekstuele informatie</li>
       </ul>
     </div>
+    <div class="info-card">
+      <h3 class="info-title">PDF Layout Instellingen</h3>
+      <p class="info-description">
+        Pas de positionering van tekst elementen in de gegenereerde facturen aan.
+        U kunt de locatie, lettergrootte en opmaak van alle tekst elementen wijzigen.
+      </p>
+
+      <div class="layout-actions">
+        <router-link to="/settings/pdf-layout" class="action-button layout-button">
+          <svg xmlns="http://www.w3.org/2000/svg" class="button-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2H9z" />
+          </svg>
+          PDF Layout Configureren
+        </router-link>
+      </div>
+
+      <div class="layout-info">
+        <h4>Functies:</h4>
+        <ul class="features-list">
+          <li>✅ Positionering van student informatie aanpassen</li>
+          <li>✅ Factuur gegevens plaatsing wijzigen</li>
+          <li>✅ Bedragen uitlijning configureren</li>
+          <li>✅ Lettergrootte en vetdruk instellen</li>
+          <li>✅ Live preview van wijzigingen</li>
+          <li>✅ Terugzetten naar standaardwaarden</li>
+        </ul>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -594,5 +622,42 @@ void formatDate;
   to {
     transform: rotate(360deg);
   }
+}
+
+.info-description {
+  color: var(--color-text-light);
+  margin-bottom: 1.5rem;
+  line-height: 1.6;
+}
+
+.layout-actions {
+  margin-bottom: 1.5rem;
+}
+
+.layout-button {
+  background-color: var(--color-secondary);
+  color: var(--color-background);
+}
+
+.layout-button:hover {
+  background-color: #e6c200;
+}
+
+.layout-info h4 {
+  font-weight: 600;
+  color: var(--color-background);
+  margin-bottom: 0.75rem;
+}
+
+.features-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.features-list li {
+  padding: 0.25rem 0;
+  color: var(--color-background);
+  font-size: 0.875rem;
 }
 </style>
