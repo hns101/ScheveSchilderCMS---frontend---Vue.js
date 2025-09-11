@@ -1,5 +1,4 @@
-// services/api/templateApi.js
-import { apiClient } from './apiClient'
+import { apiClient } from './api.ts';
 
 export const templateApi = {
 
@@ -8,29 +7,29 @@ export const templateApi = {
      */
     async getTemplateInfo() {
         try {
-            const response = await apiClient.get('/api/invoices/template/info')
-            return response
+            const response = await apiClient.get('/api/invoices/template/info');
+            return response;
         } catch (error) {
-            console.error('Error getting template info:', error)
-            throw error
+            console.error('Error getting template info:', error);
+            throw error;
         }
     },
 
     /**
      * Upload a new template
-     * @param {FormData} formData - Form data containing the file
+     * @param formData - Form data containing the file
      */
-    async uploadTemplate(formData) {
+    async uploadTemplate(formData: FormData) {
         try {
             const response = await apiClient.post('/api/invoices/template', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 }
-            })
-            return response
+            });
+            return response;
         } catch (error) {
-            console.error('Error uploading template:', error)
-            throw error
+            console.error('Error uploading template:', error);
+            throw error;
         }
     },
 
@@ -41,11 +40,11 @@ export const templateApi = {
         try {
             const response = await apiClient.get('/api/invoices/template', {
                 responseType: 'blob'
-            })
-            return response
+            });
+            return response;
         } catch (error) {
-            console.error('Error getting current template:', error)
-            throw error
+            console.error('Error getting current template:', error);
+            throw error;
         }
     },
 
@@ -56,13 +55,13 @@ export const templateApi = {
         try {
             const response = await apiClient.get('/api/invoices/template/preview', {
                 responseType: 'blob'
-            })
-            return response
+            });
+            return response;
         } catch (error) {
-            console.error('Error generating template preview:', error)
-            throw error
+            console.error('Error generating template preview:', error);
+            throw error;
         }
     }
-}
+};
 
-export default templateApi
+export default templateApi;

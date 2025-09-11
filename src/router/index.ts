@@ -42,7 +42,7 @@ const routes = [
     {
         path: '/settings',
         name: 'Settings',
-        component: Settings // Now includes PDF layout functionality
+        component: Settings
     },
     {
         path: '/pdf/:type/:id',
@@ -50,8 +50,6 @@ const routes = [
         component: PdfViewer,
         props: true
     }
-    // REMOVED: PDF Layout Editor route
-    // The PDF layout functionality is now integrated into Settings
 ]
 
 const router = createRouter({
