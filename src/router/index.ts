@@ -5,7 +5,7 @@ import StudentForm from '../components/StudentForm.vue';
 import InvoiceBatch from '../components/InvoiceBatch.vue';
 import PdfViewer from '../components/PdfViewer.vue';
 import Settings from '../components/Settings.vue';
-import PdfLayoutSettings from '../components/PdfLayoutSettings.vue';
+import PdfLayoutEditor from '../components/PdfLayoutEditor.vue';
 
 const routes: Array<RouteRecordRaw> = [
     { path: '/', redirect: '/students' },
@@ -15,7 +15,7 @@ const routes: Array<RouteRecordRaw> = [
     { path: '/students/:id/edit', name: 'EditStudent', component: StudentForm, props: true },
     { path: '/invoices', name: 'InvoiceBatch', component: InvoiceBatch },
     { path: '/settings', name: 'Settings', component: Settings },
-    { path: '/settings/pdf-layout', name: 'PdfLayoutSettings', component: PdfLayoutSettings },
+    { path: '/pdf-layout', name: 'PdfLayoutEditor', component: PdfLayoutEditor },
     { path: '/pdf/:type/:id', name: 'PdfViewer', component: PdfViewer }
 ];
 

@@ -86,21 +86,26 @@ import { useRouter } from 'vue-router';
 import type { Student } from '../types/Student';
 
 const props = defineProps<{
-  id?: string; // Prop to receive student ID for editing
+  id?: string;
 }>();
 
 const router = useRouter();
-
 const isEditing = computed(() => !!props.id);
 
 const formData = ref<Student>({
-  name: '', studentNumber: '', address: '', email: '', phoneNumber: '',
-  emergencyContact: '', bankName: '', accountNumber: '', dateOfRegistration: new Date(),
+  name: '',
+  studentNumber: '',
+  address: '',
+  email: '',
+  phoneNumber: '',
+  emergencyContact: '',
+  bankName: '',
+  accountNumber: '',
+  dateOfRegistration: new Date(),
 });
 
 const fileInput = ref<HTMLInputElement | null>(null);
 const file = ref<File | null>(null);
-
 const loadingStudent = ref(false);
 const studentFetchError = ref<string | null>(null);
 const submitting = ref(false);
@@ -109,18 +114,50 @@ const submitStatus = ref<'success' | 'error' | null>(null);
 const fileUploadMessage = ref<string | null>(null);
 const fileUploadStatus = ref<'success' | 'error' | null>(null);
 
+// FIXED: Better API response handling
 const fetchStudentData = async (studentId: string) => {
   loadingStudent.value = true;
   studentFetchError.value = null;
+
   try {
-    const response = await axios.get<Student>(`/api/students/${studentId}`);
+    console.log(`Fetching student data for ID: ${studentId}`);
+    const response = await axios.get(`/api/students/${studentId}`);
+
+    // Handle both old and new API response formats
+    let studentData;
+    if (response.data && response.data.success !== undefined) {
+      if (response.data.success) {
+        studentData = response.data.data;
+      } else {
+        throw new Error(response.data.message || 'Failed to fetch student data');
+      }
+    } else {
+      studentData = response.data;
+    }
+
+    // FIXED: Proper date handling
     formData.value = {
-      ...response.data,
-      dateOfRegistration: new Date(response.data.dateOfRegistration),
+      ...studentData,
+      dateOfRegistration: studentData.dateOfRegistration ? new Date(studentData.dateOfRegistration) : new Date(),
     };
+
+    console.log('Student data loaded successfully:', formData.value);
+
   } catch (err: any) {
-    console.error(`Fout bij het ophalen van student met ID ${studentId}:`, err);
-    studentFetchError.value = `Fout bij het laden van studentgegevens: ${err.response?.data?.title || err.message}`;
+    console.error(`Error fetching student with ID ${studentId}:`, err);
+
+    let errorMessage = 'Error loading student data';
+    if (err.response?.data) {
+      if (err.response.data.message) {
+        errorMessage = err.response.data.message;
+      } else if (err.response.data.title) {
+        errorMessage = err.response.data.title;
+      }
+    } else if (err.message) {
+      errorMessage = err.message;
+    }
+
+    studentFetchError.value = errorMessage;
   } finally {
     loadingStudent.value = false;
   }
@@ -130,9 +167,11 @@ const formattedDateOfRegistration = computed({
   get: () => {
     if (formData.value.dateOfRegistration) {
       const date = new Date(formData.value.dateOfRegistration);
-      return date.toISOString().split('T')[0];
+      if (!isNaN(date.getTime())) {
+        return date.toISOString().split('T')[0];
+      }
     }
-    return '';
+    return new Date().toISOString().split('T')[0];
   },
   set: (value) => {
     if (value) {
@@ -161,14 +200,15 @@ const clearFile = () => {
 
 const deleteExistingDocument = async () => {
   if (!formData.value.id) return;
+
   try {
     await axios.delete(`/api/students/${formData.value.id}/registration-document`);
     formData.value.registrationDocumentPath = undefined;
     fileUploadMessage.value = 'Document succesvol verwijderd.';
     fileUploadStatus.value = 'success';
   } catch (err: any) {
-    console.error("Fout bij het verwijderen van document:", err);
-    fileUploadMessage.value = `Fout bij verwijderen: ${err.response?.data?.title || err.message}`;
+    console.error("Error deleting document:", err);
+    fileUploadMessage.value = `Error deleting document: ${err.response?.data?.message || err.message}`;
     fileUploadStatus.value = 'error';
   }
 };
@@ -177,7 +217,7 @@ const getRegistrationDocumentUrl = () => {
   return `/api/students/${formData.value.id}/registration-document`;
 };
 
-
+// FIXED: Better form submission with proper error handling
 const submitForm = async () => {
   submitting.value = true;
   submitMessage.value = null;
@@ -185,22 +225,35 @@ const submitForm = async () => {
 
   try {
     let studentResponse;
+    let studentId;
 
+    // Create or update student
     if (isEditing.value && formData.value.id) {
+      console.log('Updating existing student:', formData.value.id);
       studentResponse = await axios.put(`/api/students/${formData.value.id}`, formData.value);
+      studentId = formData.value.id;
     } else {
+      console.log('Creating new student');
       studentResponse = await axios.post('/api/students', formData.value);
+
+      // Handle different response formats for new student creation
+      if (studentResponse.data && studentResponse.data.success !== undefined) {
+        studentId = studentResponse.data.data?.id;
+      } else {
+        studentId = studentResponse.data?.id;
+      }
     }
 
-    if (file.value) {
-      const studentId = studentResponse.data.id || formData.value.id;
+    // Upload file if provided
+    if (file.value && studentId) {
+      console.log('Uploading registration document for student:', studentId);
       const formDataToSend = new FormData();
       formDataToSend.append('file', file.value);
+
       await axios.post(`/api/students/${studentId}/registration-document`, formDataToSend, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
+        headers: { 'Content-Type': 'multipart/form-data' },
       });
+
       fileUploadMessage.value = 'Document succesvol geüpload!';
       fileUploadStatus.value = 'success';
     }
@@ -208,21 +261,37 @@ const submitForm = async () => {
     submitMessage.value = `Student succesvol ${isEditing.value ? 'bijgewerkt' : 'toegevoegd'}!`;
     submitStatus.value = 'success';
 
+    // Reset form for new students
     if (!isEditing.value) {
       formData.value = {
         name: '', studentNumber: '', address: '', email: '', phoneNumber: '',
         emergencyContact: '', bankName: '', accountNumber: '', dateOfRegistration: new Date(),
       };
-      if (fileInput.value) {
-        fileInput.value.value = '';
-      }
-      file.value = null;
+      clearFile();
     }
 
-    router.back();
+    // Navigate back after short delay
+    setTimeout(() => {
+      router.back();
+    }, 1000);
+
   } catch (err: any) {
-    console.error("Fout bij het opslaan van student:", err);
-    submitMessage.value = `Fout: ${err.response?.data?.title || err.response?.data?.detail || err.message}`;
+    console.error("Error saving student:", err);
+
+    let errorMessage = 'Error saving student';
+    if (err.response?.data) {
+      if (err.response.data.message) {
+        errorMessage = err.response.data.message;
+      } else if (err.response.data.title) {
+        errorMessage = err.response.data.title;
+      } else if (err.response.data.errors) {
+        errorMessage = err.response.data.errors.join(', ');
+      }
+    } else if (err.message) {
+      errorMessage = err.message;
+    }
+
+    submitMessage.value = errorMessage;
     submitStatus.value = 'error';
   } finally {
     submitting.value = false;
@@ -233,23 +302,23 @@ const cancelForm = () => {
   router.back();
 };
 
+// FIXED: Better prop watching
 watch(() => props.id, (newId) => {
   if (newId) {
+    console.log('Student ID changed to:', newId);
     fetchStudentData(newId);
   }
 }, { immediate: true });
 
 onMounted(() => {
   if (props.id) {
+    console.log('Component mounted, loading student:', props.id);
     fetchStudentData(props.id);
   }
 });
 </script>
 
 <style scoped>
-/* Your provided CSS for form-card, form-title, form-group, form-label, form-input, form-select,
-   form-actions, submit-button, cancel-button, message, message.success, message.error, detail-link */
-
 .form-card {
   background-color: var(--color-white);
   border: 1px solid var(--color-border);
@@ -260,7 +329,7 @@ onMounted(() => {
 }
 
 .form-title {
-  font-size: 1.5rem; /* 24px */
+  font-size: 1.5rem;
   font-weight: 600;
   color: var(--color-text-dark);
   margin-bottom: 1.5rem;
@@ -334,7 +403,7 @@ onMounted(() => {
   background-color: #8a939e;
 }
 
-.message {
+.message, .loading-message, .error-message {
   padding: 1rem;
   border-radius: 0.5rem;
   margin-top: 1rem;
@@ -342,12 +411,12 @@ onMounted(() => {
   text-align: center;
 }
 
-.message.success {
+.message.success, .loading-message {
   background-color: #d1fae5;
   color: #059669;
 }
 
-.message.error {
+.message.error, .error-message {
   background-color: #fee2e2;
   color: #ef4444;
 }
@@ -364,6 +433,10 @@ onMounted(() => {
   margin-top: 0.5rem;
 }
 
+.file-name {
+  font-weight: 500;
+}
+
 .delete-file-button {
   background-color: #ef4444;
   color: var(--color-background-light);
@@ -372,6 +445,7 @@ onMounted(() => {
   border: none;
   cursor: pointer;
   font-weight: 600;
+  font-size: 0.875rem;
 }
 
 .delete-file-button:hover {

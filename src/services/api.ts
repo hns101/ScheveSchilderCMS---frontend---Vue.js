@@ -1,7 +1,7 @@
 // src/services/api.ts
 import axios from 'axios';
 
-// Configure axios base URL
+// FIXED: Configure axios base URL to match your backend port
 axios.defaults.baseURL = 'http://localhost:5000';
 
 // Add response interceptor to handle ApiResponse<T> format
