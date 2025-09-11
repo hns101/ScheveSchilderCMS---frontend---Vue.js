@@ -1,33 +1,50 @@
 # Stage 1: Build the Vue.js application
 FROM node:20-alpine AS build-stage
 
-# Set the working directory inside the container
+# Set working directory
 WORKDIR /app
 
-# Copy package.json and package-lock.json (or yarn.lock)
-# to install dependencies
+# Copy package files
 COPY package*.json ./
 
-# Install dependencies
+# Clean npm cache and remove any existing lock files to avoid optional dependency issues
+RUN rm -rf node_modules package-lock.json
+RUN npm cache clean --force
+
+# Install all dependencies (including dev dependencies needed for build)
 RUN npm install
 
-# Copy the rest of the application code
+# Explicitly install the Rollup binary for Alpine Linux
+RUN npm install @rollup/rollup-linux-x64-musl --save-optional
+
+# Copy source code
 COPY . .
 
 # Build the Vue.js application for production
 RUN npm run build
 
-# Stage 2: Serve the application with Nginx
+# Stage 2: Serve with Nginx
 FROM nginx:stable-alpine AS production-stage
 
-# Copy the custom Nginx configuration
+# Install wget for health checks
+RUN apk add --no-cache wget
+
+# Copy custom Nginx configuration
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Copy the built Vue.js application from the build-stage
+# Copy built Vue.js application from build stage
 COPY --from=build-stage /app/dist /usr/share/nginx/html
 
-# Expose port 80 for the web server
+# Set proper permissions
+RUN chown -R nginx:nginx /usr/share/nginx/html && \
+    chmod -R 755 /usr/share/nginx/html
+
+# Expose port 80
 EXPOSE 80
+
+# Add health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+    CMD wget --quiet --tries=1 --spider http://localhost:80 || exit 1
 
 # Start Nginx
 CMD ["nginx", "-g", "daemon off;"]
