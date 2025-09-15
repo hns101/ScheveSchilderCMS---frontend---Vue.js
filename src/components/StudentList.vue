@@ -28,7 +28,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import api from '../services/api';
+import axios from 'axios';
 import { useRouter } from 'vue-router';
 import type { Student } from '../types/Student';
 
@@ -38,26 +38,65 @@ const error = ref<string | null>(null);
 const router = useRouter();
 
 const fetchStudents = async () => {
+  loading.value = true;
+  error.value = null;
+
   try {
-    const response = await api.get<Student[]>('/api/students');
-    students.value = response.data || [];
+    console.log('Fetching students from API...');
+    const response = await axios.get('/api/students');
+
+    console.log('API Response:', response.data);
+
+    // Handle both old and new API response formats
+    if (response.data && response.data.success !== undefined) {
+      // New API format with ApiResponse wrapper
+      if (response.data.success) {
+        students.value = response.data.data || [];
+      } else {
+        error.value = response.data.message || "Failed to fetch students";
+      }
+    } else {
+      // Old API format (direct data)
+      students.value = response.data || [];
+    }
+
+    console.log('Students loaded:', students.value.length);
   } catch (err: any) {
-    console.error("Fout bij het ophalen van studenten:", err);
-    error.value = err.response?.data?.message || "Er is een fout opgetreden bij het laden van studenten.";
+    console.error("Error fetching students:", err);
+
+    if (err.response) {
+      if (err.response.data && err.response.data.message) {
+        error.value = err.response.data.message;
+      } else if (err.response.status === 404) {
+        error.value = "API endpoint not found. Check if the backend is running.";
+      } else if (err.response.status >= 500) {
+        error.value = "Server error. Please try again later.";
+      } else {
+        error.value = `HTTP Error: ${err.response.status}`;
+      }
+    } else if (err.request) {
+      error.value = "Cannot connect to server. Check if the backend is running on http://localhost:5000";
+    } else {
+      error.value = err.message || "Unknown error occurred";
+    }
   } finally {
     loading.value = false;
   }
 };
 
 const viewStudentDetail = (id: string) => {
-  router.push({ name: 'StudentDetail', params: { id } });
+  if (id) {
+    router.push({ name: 'StudentDetail', params: { id } });
+  }
 };
 
 const navigateToAddStudent = () => {
   router.push({ name: 'AddStudent' });
 };
 
-onMounted(fetchStudents);
+onMounted(() => {
+  fetchStudents();
+});
 </script>
 
 <style scoped>
