@@ -1,29 +1,32 @@
-import { apiClient } from './api.ts';
+import { apiClient } from './api';
 
 /**
  * Interface representing the structure of a position object.
- * This improves type safety and code readability.
  */
 interface ElementPosition {
-    x: number;
-    y: number;
-    // Add other properties if your position object has them, e.g.,
-    // width?: number;
-    // height?: number;
+    top: number;
+    left: number;
+    fontSize: number;
+    maxHeight: number;
+    isBold: boolean;
+    textAlign: string;
 }
 
 /**
  * Interface for the main layout settings object.
- * This is a good practice for more complex objects.
  */
 interface LayoutSettings {
-    [key: string]: any; // A simple way to represent various settings
-    // A more precise approach would be to define each property:
-    // header: ElementPosition;
-    // signature: ElementPosition;
-    // etc.
+    studentName: ElementPosition;
+    studentAddress: ElementPosition;
+    invoiceId: ElementPosition;
+    invoiceDate: ElementPosition;
+    invoiceDescription: ElementPosition;
+    baseAmount: ElementPosition;
+    vatAmount: ElementPosition;
+    totalAmount: ElementPosition;
+    paymentNote: ElementPosition;
+    contactInfo: ElementPosition;
 }
-
 
 export const pdfLayoutApi = {
 
@@ -32,7 +35,7 @@ export const pdfLayoutApi = {
      */
     async getLayoutSettings() {
         try {
-            const response = await apiClient.get('/api/invoices/settings/layout');
+            const response = await apiClient.get('/api/pdflayout');
             return response;
         } catch (error) {
             console.error('Error getting layout settings:', error);
@@ -46,7 +49,7 @@ export const pdfLayoutApi = {
      */
     async updateLayoutSettings(layoutSettings: LayoutSettings) {
         try {
-            const response = await apiClient.put('/api/invoices/settings/layout', layoutSettings);
+            const response = await apiClient.put('/api/pdflayout', layoutSettings);
             return response;
         } catch (error) {
             console.error('Error updating layout settings:', error);
@@ -59,7 +62,7 @@ export const pdfLayoutApi = {
      */
     async resetToDefaults() {
         try {
-            const response = await apiClient.post('/api/invoices/settings/layout/reset');
+            const response = await apiClient.post('/api/pdflayout/reset');
             return response;
         } catch (error) {
             console.error('Error resetting layout settings:', error);
@@ -73,14 +76,24 @@ export const pdfLayoutApi = {
      */
     async generatePreview(layoutSettings: LayoutSettings | null = null) {
         try {
-            const response = await apiClient.post(
-                '/api/invoices/settings/layout/preview',
-                layoutSettings,
-                {
-                    responseType: 'blob' // Important for PDF download
-                }
-            );
-            return response;
+            if (layoutSettings) {
+                const response = await apiClient.post(
+                    '/api/pdflayout/preview',
+                    { layoutSettings },
+                    {
+                        responseType: 'blob' // Important for PDF download
+                    }
+                );
+                return response;
+            } else {
+                const response = await apiClient.get(
+                    '/api/pdflayout/preview',
+                    {
+                        responseType: 'blob' // Important for PDF download
+                    }
+                );
+                return response;
+            }
         } catch (error) {
             console.error('Error generating preview:', error);
             throw error;
