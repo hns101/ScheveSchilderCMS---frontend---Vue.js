@@ -133,13 +133,13 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, defineEmits } from 'vue'
 import PdfElementEditor from './PdfElementEditor.vue'
-import { pdfLayoutApi } from '../services/api'
+import axios from 'axios'
 
 // Reactive data
-const layoutSettings = ref(null)
+const layoutSettings = ref<any>(null)
 const loading = ref(false)
 const error = ref('')
 
@@ -152,9 +152,18 @@ const loadLayoutSettings = async () => {
   error.value = ''
 
   try {
-    const response = await pdfLayoutApi.getLayoutSettings()
-    layoutSettings.value = response.data.data
-  } catch (err) {
+    console.log('Loading layout settings...')
+    const response = await axios.get('/api/pdflayout')
+
+    // Handle both old and new API response formats
+    if (response.data && response.data.success !== undefined) {
+      layoutSettings.value = response.data.success ? response.data.data : null
+    } else {
+      layoutSettings.value = response.data
+    }
+
+    console.log('Layout settings loaded:', layoutSettings.value)
+  } catch (err: any) {
     error.value = 'Kon layout instellingen niet laden'
     console.error('Error loading layout settings:', err)
   } finally {
@@ -168,11 +177,20 @@ const saveSettings = async () => {
   error.value = ''
 
   try {
-    const response = await pdfLayoutApi.updateLayoutSettings(layoutSettings.value)
-    emit('saved', response.data.data)
-    // Show success message or toast
+    console.log('Saving layout settings:', layoutSettings.value)
+    const response = await axios.put('/api/pdflayout', layoutSettings.value)
+
+    // Handle both old and new API response formats
+    let responseData
+    if (response.data && response.data.success !== undefined) {
+      responseData = response.data.success ? response.data.data : null
+    } else {
+      responseData = response.data
+    }
+
+    emit('saved', responseData)
     alert('Layout instellingen succesvol opgeslagen!')
-  } catch (err) {
+  } catch (err: any) {
     error.value = 'Kon layout instellingen niet opslaan'
     console.error('Error saving layout settings:', err)
   } finally {
@@ -190,10 +208,18 @@ const resetToDefaults = async () => {
   error.value = ''
 
   try {
-    const response = await pdfLayoutApi.resetToDefaults()
-    layoutSettings.value = response.data.data
+    console.log('Resetting to default layout settings...')
+    const response = await axios.post('/api/pdflayout/reset')
+
+    // Handle both old and new API response formats
+    if (response.data && response.data.success !== undefined) {
+      layoutSettings.value = response.data.success ? response.data.data : null
+    } else {
+      layoutSettings.value = response.data
+    }
+
     alert('Layout instellingen gereset naar standaard!')
-  } catch (err) {
+  } catch (err: any) {
     error.value = 'Kon instellingen niet resetten'
     console.error('Error resetting layout settings:', err)
   } finally {
@@ -206,7 +232,10 @@ const generatePreview = async () => {
   loading.value = true
 
   try {
-    const response = await pdfLayoutApi.generatePreview(layoutSettings.value)
+    console.log('Generating PDF preview...')
+    const response = await axios.get('/api/pdflayout/preview', {
+      responseType: 'blob'
+    })
 
     // Create blob and download
     const blob = new Blob([response.data], { type: 'application/pdf' })
@@ -220,7 +249,7 @@ const generatePreview = async () => {
     window.URL.revokeObjectURL(url)
 
     emit('preview-generated')
-  } catch (err) {
+  } catch (err: any) {
     error.value = 'Kon voorbeeld niet genereren'
     console.error('Error generating preview:', err)
   } finally {
