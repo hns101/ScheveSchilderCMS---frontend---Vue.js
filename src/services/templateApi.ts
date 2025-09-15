@@ -1,4 +1,4 @@
-import { apiClient } from './api.ts';
+import { apiClient } from './api';
 
 export const templateApi = {
 
