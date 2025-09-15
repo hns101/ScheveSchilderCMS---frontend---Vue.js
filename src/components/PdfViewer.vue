@@ -53,14 +53,14 @@
           frameborder="0"
           @load="onIframeLoad"
           @error="onIframeError"
+          title="PDF Viewer"
       ></iframe>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-// @ts-nocheck
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import axios from 'axios';
 
@@ -77,8 +77,8 @@ const fetchPdf = async () => {
   error.value = null;
 
   const { type, id } = route.params;
-  let apiEndpoint = '';
-  let documentTitle = '';
+
+  console.log('Fetching PDF - Type:', type, 'ID:', id);
 
   // Validate parameters
   if (!type || !id || typeof type !== 'string' || typeof id !== 'string') {
@@ -86,6 +86,9 @@ const fetchPdf = async () => {
     loading.value = false;
     return;
   }
+
+  let apiEndpoint = '';
+  let documentTitle = '';
 
   // Set endpoint and title based on type
   if (type === 'student') {
@@ -103,6 +106,8 @@ const fetchPdf = async () => {
   title.value = documentTitle;
 
   try {
+    console.log('Making request to:', apiEndpoint);
+
     // Add timestamp to prevent caching issues
     const timestamp = new Date().getTime();
     const response = await axios.get(`${apiEndpoint}?t=${timestamp}`, {
@@ -112,6 +117,8 @@ const fetchPdf = async () => {
         'Accept': 'application/pdf'
       }
     });
+
+    console.log('Response received, type:', response.data.type, 'size:', response.data.size);
 
     // Check if response is actually a PDF
     if (response.data.type && !response.data.type.includes('pdf')) {
@@ -127,9 +134,10 @@ const fetchPdf = async () => {
     }
 
     pdfUrl.value = URL.createObjectURL(blob);
+    console.log('PDF URL created successfully');
 
   } catch (err: any) {
-    console.error(`Fout bij het laden van de PDF vanaf ${apiEndpoint}:`, err);
+    console.error(`Error loading PDF from ${apiEndpoint}:`, err);
 
     // Handle different error types
     if (err.code === 'ECONNABORTED') {
@@ -160,30 +168,30 @@ const retryLoad = () => {
     URL.revokeObjectURL(pdfUrl.value);
     pdfUrl.value = '';
   }
-
   fetchPdf();
 };
 
 const onIframeLoad = () => {
-  // PDF loaded successfully in iframe
-  console.log('PDF loaded successfully');
+  console.log('PDF loaded successfully in iframe');
 };
 
 const onIframeError = () => {
+  console.error('Error loading PDF in iframe');
   error.value = 'Fout bij het weergeven van de PDF in de browser.';
   loading.value = false;
 };
 
-// Cleanup blob URL when component is unmounted
+// Initialize on mount
 onMounted(() => {
+  console.log('PDF Viewer mounted with params:', route.params);
   fetchPdf();
+});
 
-  // Cleanup function
-  return () => {
-    if (pdfUrl.value) {
-      URL.revokeObjectURL(pdfUrl.value);
-    }
-  };
+// Cleanup blob URL when component is unmounted
+onUnmounted(() => {
+  if (pdfUrl.value) {
+    URL.revokeObjectURL(pdfUrl.value);
+  }
 });
 </script>
 
