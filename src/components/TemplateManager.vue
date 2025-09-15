@@ -147,20 +147,20 @@
   </div>
 </template>
 
-<script setup>
-import { ref, onMounted, defineEmits } from 'vue'
-import { templateApi } from '../services/api'
+<script setup lang="ts">
+import { ref, onMounted, onUnmounted, defineEmits } from 'vue'
+import axios from 'axios'
 
 // Reactive data
-const templateInfo = ref(null)
-const selectedFile = ref(null)
-const previewUrl = ref(null)
+const templateInfo = ref<any>(null)
+const selectedFile = ref<File | null>(null)
+const previewUrl = ref<string | null>(null)
 const loading = ref(false)
 const uploading = ref(false)
 const error = ref('')
 const successMessage = ref('')
 const isDragOver = ref(false)
-const fileInput = ref(null)
+const fileInput = ref<HTMLInputElement | null>(null)
 
 // Emits
 const emit = defineEmits(['template-updated'])
@@ -171,9 +171,17 @@ const loadTemplateInfo = async () => {
   error.value = ''
 
   try {
-    const response = await templateApi.getTemplateInfo()
-    templateInfo.value = response.data.data
-  } catch (err) {
+    const response = await axios.get('/api/invoices/template/info')
+
+    // Handle both old and new API response formats
+    if (response.data && response.data.success !== undefined) {
+      templateInfo.value = response.data.success ? response.data.data : { hasTemplate: false }
+    } else {
+      templateInfo.value = response.data
+    }
+
+    console.log('Template info loaded:', templateInfo.value)
+  } catch (err: any) {
     error.value = 'Kon template informatie niet laden'
     console.error('Error loading template info:', err)
   } finally {
@@ -182,36 +190,37 @@ const loadTemplateInfo = async () => {
 }
 
 // Handle file selection
-const handleFileSelect = (event) => {
-  const file = event.target.files[0]
+const handleFileSelect = (event: Event) => {
+  const target = event.target as HTMLInputElement
+  const file = target.files?.[0]
   if (file) {
     setSelectedFile(file)
   }
 }
 
 // Handle drag and drop
-const handleDrop = (event) => {
+const handleDrop = (event: DragEvent) => {
   event.preventDefault()
   isDragOver.value = false
 
-  const files = event.dataTransfer.files
-  if (files.length > 0) {
+  const files = event.dataTransfer?.files
+  if (files && files.length > 0) {
     setSelectedFile(files[0])
   }
 }
 
-const handleDragOver = (event) => {
+const handleDragOver = (event: DragEvent) => {
   event.preventDefault()
   isDragOver.value = true
 }
 
-const handleDragLeave = (event) => {
+const handleDragLeave = (event: DragEvent) => {
   event.preventDefault()
   isDragOver.value = false
 }
 
 // Set selected file and create preview
-const setSelectedFile = (file) => {
+const setSelectedFile = (file: File) => {
   // Validate file
   if (!validateFile(file)) {
     return
@@ -230,7 +239,7 @@ const setSelectedFile = (file) => {
 }
 
 // Validate file
-const validateFile = (file) => {
+const validateFile = (file: File) => {
   const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/bmp', 'image/tiff']
   const maxSize = 5 * 1024 * 1024 // 5MB
 
@@ -278,10 +287,23 @@ const uploadTemplate = async () => {
     const formData = new FormData()
     formData.append('file', selectedFile.value)
 
-    const response = await templateApi.uploadTemplate(formData)
+    const response = await axios.post('/api/invoices/template', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    })
 
     successMessage.value = 'Template succesvol geüpload!'
-    emit('template-updated', response.data.data)
+
+    // Handle both old and new API response formats
+    let responseData
+    if (response.data && response.data.success !== undefined) {
+      responseData = response.data.success ? response.data.data : null
+    } else {
+      responseData = response.data
+    }
+
+    emit('template-updated', responseData)
 
     // Refresh template info
     await loadTemplateInfo()
@@ -289,7 +311,7 @@ const uploadTemplate = async () => {
     // Clear selected file
     removeSelectedFile()
 
-  } catch (err) {
+  } catch (err: any) {
     error.value = err.response?.data?.message || 'Kon template niet uploaden'
     console.error('Error uploading template:', err)
   } finally {
@@ -300,14 +322,16 @@ const uploadTemplate = async () => {
 // View current template
 const viewCurrentTemplate = async () => {
   try {
-    const response = await templateApi.getCurrentTemplate()
+    const response = await axios.get('/api/invoices/template', {
+      responseType: 'blob'
+    })
 
     // Create blob and open in new tab
     const blob = new Blob([response.data])
     const url = window.URL.createObjectURL(blob)
     window.open(url, '_blank')
 
-  } catch (err) {
+  } catch (err: any) {
     error.value = 'Kon template niet laden'
     console.error('Error viewing template:', err)
   }
@@ -319,7 +343,9 @@ const generateTemplatePreview = async () => {
   error.value = ''
 
   try {
-    const response = await templateApi.generatePreview()
+    const response = await axios.get('/api/invoices/template/preview', {
+      responseType: 'blob'
+    })
 
     // Create blob and download
     const blob = new Blob([response.data], { type: 'application/pdf' })
@@ -334,7 +360,7 @@ const generateTemplatePreview = async () => {
 
     successMessage.value = 'Voorbeeld PDF gegenereerd en gedownload!'
 
-  } catch (err) {
+  } catch (err: any) {
     error.value = 'Kon voorbeeld niet genereren'
     console.error('Error generating preview:', err)
   } finally {
@@ -343,7 +369,7 @@ const generateTemplatePreview = async () => {
 }
 
 // Utility functions
-const formatFileSize = (bytes) => {
+const formatFileSize = (bytes: number) => {
   if (bytes === 0) return '0 Bytes'
   const k = 1024
   const sizes = ['Bytes', 'KB', 'MB', 'GB']
@@ -351,7 +377,7 @@ const formatFileSize = (bytes) => {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
 }
 
-const formatDate = (dateString) => {
+const formatDate = (dateString: string) => {
   if (!dateString) return 'Onbekend'
   return new Date(dateString).toLocaleDateString('nl-NL', {
     year: 'numeric',
