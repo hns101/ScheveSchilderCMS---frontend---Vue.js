@@ -11,7 +11,7 @@
               id="top"
               type="number"
               :value="modelValue.top"
-              @input="updateValue('top', $event.target.value)"
+              @input="updateValue('top', ($event.target as HTMLInputElement).value)"
               min="0"
               max="1000"
               class="form-control"
@@ -24,7 +24,7 @@
               id="left"
               type="number"
               :value="modelValue.left"
-              @input="updateValue('left', $event.target.value)"
+              @input="updateValue('left', ($event.target as HTMLInputElement).value)"
               min="0"
               max="1000"
               class="form-control"
@@ -40,7 +40,7 @@
               id="fontSize"
               type="number"
               :value="modelValue.fontSize"
-              @input="updateValue('fontSize', $event.target.value)"
+              @input="updateValue('fontSize', ($event.target as HTMLInputElement).value)"
               min="6"
               max="30"
               class="form-control"
@@ -53,7 +53,7 @@
               id="maxHeight"
               type="number"
               :value="modelValue.maxHeight"
-              @input="updateValue('maxHeight', $event.target.value)"
+              @input="updateValue('maxHeight', ($event.target as HTMLInputElement).value)"
               min="10"
               max="100"
               class="form-control"
@@ -68,7 +68,7 @@
           <select
               id="textAlign"
               :value="modelValue.textAlign"
-              @change="updateValue('textAlign', $event.target.value)"
+              @change="updateValue('textAlign', ($event.target as HTMLSelectElement).value)"
               class="form-control"
           >
             <option value="Left">Links</option>
@@ -82,7 +82,7 @@
             <input
                 type="checkbox"
                 :checked="modelValue.isBold"
-                @change="updateValue('isBold', $event.target.checked)"
+                @change="updateValue('isBold', ($event.target as HTMLInputElement).checked)"
             />
             <span class="checkmark"></span>
             Vetgedrukt
@@ -103,46 +103,39 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed, defineProps, defineEmits } from 'vue'
 
+interface ElementPosition {
+  top: number;
+  left: number;
+  fontSize: number;
+  maxHeight: number;
+  isBold: boolean;
+  textAlign: string;
+}
+
 // Props
-const props = defineProps({
-  modelValue: {
-    type: Object,
-    required: true,
-    validator: (value) => {
-      return value &&
-          typeof value.top === 'number' &&
-          typeof value.left === 'number' &&
-          typeof value.fontSize === 'number' &&
-          typeof value.maxHeight === 'number' &&
-          typeof value.isBold === 'boolean' &&
-          typeof value.textAlign === 'string'
-    }
-  },
-  label: {
-    type: String,
-    required: true
-  },
-  elementKey: {
-    type: String,
-    required: true
-  }
-})
+const props = defineProps<{
+  modelValue: ElementPosition;
+  label: string;
+  elementKey: string;
+}>()
 
 // Emits
-const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits<{
+  'update:modelValue': [value: ElementPosition]
+}>()
 
 // Update value method
-const updateValue = (property, value) => {
+const updateValue = (property: keyof ElementPosition, value: string | number | boolean) => {
   const updatedValue = { ...props.modelValue }
 
   // Convert numeric strings to numbers
-  if (['top', 'left', 'fontSize', 'maxHeight'].includes(property)) {
-    updatedValue[property] = parseInt(value, 10) || 0
+  if (['top', 'left', 'fontSize', 'maxHeight'].includes(property as string)) {
+    updatedValue[property as keyof ElementPosition] = parseInt(value as string, 10) || 0
   } else {
-    updatedValue[property] = value
+    updatedValue[property] = value as any
   }
 
   emit('update:modelValue', updatedValue)
@@ -152,14 +145,14 @@ const updateValue = (property, value) => {
 const previewStyle = computed(() => ({
   fontSize: `${props.modelValue.fontSize}px`,
   fontWeight: props.modelValue.isBold ? 'bold' : 'normal',
-  textAlign: props.modelValue.textAlign.toLowerCase(),
+  textAlign: props.modelValue.textAlign.toLowerCase() as 'left' | 'center' | 'right',
   maxHeight: `${props.modelValue.maxHeight}px`,
   overflow: 'hidden'
 }))
 
 // Get preview text based on element type
 const getPreviewText = () => {
-  const previewTexts = {
+  const previewTexts: Record<string, string> = {
     studentName: 'Jan de Vries',
     studentAddress: 'Voorbeeldstraat 123, 1234 AB Amsterdam',
     invoiceId: 'INV-2023-001',
